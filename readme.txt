@@ -2,7 +2,7 @@
 Contributors: Webshipr 
 link: http://www.webshipr.dk
 Tags: shipping, valgfrit afhentningssted, automated shipping, post danmark, postdk, bluewater,blue water,woocommerce, automatic shipping, dropshipping, webshipr, webshipper 
-Stable tag: 1.1.2
+Stable tag: 1.1.3
 Requires at least: 3.7
 Tested up to: 3.8.1
 
@@ -10,9 +10,9 @@ Automated shipping for woo-commerce.
 
 == Description ==
 
-Webshipr automates the shipping flow in your webshop. In one click your shipments are sent directly to the shipper, a label is generated, and
+Webshipr automates the shipping flow in your WooCommerce webshop. In one click your shipments are sent directly to the shipper, a label is generated, and
 your tracking informations are available directly from the woo-commerce backend. 
-It's free to try for 30 days. Sign up on webshipr.com.
+It's free to try for 30 days. Sign up on http://www.webshipr.com.
 
 = Key Features =
 * Automate shipping
@@ -34,3 +34,8 @@ It's free to try for 30 days. Sign up on webshipr.com.
 * Go to Settings => Webshipr options
 * Insert your API key from your Webshipr account. 
 * You are ready to go!
+
+
+== Brief Version History ==
+
+* 1.1.3: Fixed issues for Woo Commerce 2.1.2 in regards to "Valgfrit afhentningssted" 

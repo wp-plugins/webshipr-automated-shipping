@@ -4,7 +4,7 @@
 	parse_str($_POST["post_data"], $post_data);
 	
 	// Check if specific shipping address specified
-	if((string)$post_data["shiptobilling"] == "1"){
+	if((string)$post_data["shiptobilling"] == "1" || (string)$post_data["ship_to_different_address"] != "1"){
 		$street  = preg_split('/(?=\d)/', $_POST["address"]);
 		$street  = $street[0];
 		$number  = filter_var($_POST["address"], FILTER_SANITIZE_NUMBER_INT);
@@ -49,7 +49,7 @@
 </tr>
 <tr>
 		<td colspan="2"> 
-			<select name="dynamic_destination" id="dynamic_destination_select">
+			<select name="dynamic_destination" id="dynamic_destination_select" style="width: auto;">
 				<?php foreach($shops->servicePoints as $shop){ ?>
 					<option value="<?php echo $shop->servicePointId?>">
 						<?php echo $shop->name ?> - <?php echo $shop->visitingAddress->streetName ?>
@@ -134,6 +134,7 @@
 					});
 					jQuery(document).ready(function(){
 						set_selection_hours(jQuery("#dynamic_destination_select").find(":selected").val());
+						var int=self.setInterval(set_selection_hours(jQuery("#dynamic_destination_select").find(":selected").val()), 3000);
 					});
 				</script>
 		</td>
