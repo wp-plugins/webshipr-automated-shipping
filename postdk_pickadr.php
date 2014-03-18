@@ -48,7 +48,7 @@
 		<th colspan="2"> Vælg nærmeste afhentningssted </th>
 </tr>
 <tr>
-		<td colspan="2"> 
+		<td colspan="2" > 
 			<select name="dynamic_destination" id="dynamic_destination_select" style="width: auto;">
 				<?php foreach($shops->servicePoints as $shop){ ?>
 					<option value="<?php echo $shop->servicePointId?>">
@@ -60,83 +60,54 @@
 			<div id="pickup_info">
 
 			</div>
-				<script>
-					function get_opening_hours(id){
-						var shops = {
-						<?php
-						$count = 1;
-						foreach($shops->servicePoints as $shop){
-							$delimiter = (count($shops->servicePoints) == $count ? "" : ",");
-						?>
-							<?php echo $shop->servicePointId; ?>: {
-																	"MO": "<?php echo write_day('MO', $shop);?>", 
-																	"TU": "<?php echo write_day('TU', $shop);?>",
-																	"WE": "<?php echo write_day('WE', $shop);?>", 
-																	"TH": "<?php echo write_day('TH', $shop);?>", 
-																	"FR": "<?php echo write_day('FR', $shop);?>", 
-																	"SA": "<?php echo write_day('SA', $shop);?>", 
-																	"SU": "<?php echo write_day('SU', $shop);?>",
-																	"street": "<?php echo $shop->deliveryAddress->streetName." ".$shop->deliveryAddress->streetNumber?>",
-																	"postal_code": "<?php echo $shop->deliveryAddress->postalCode ?>",
-																	"country": "<?php echo $shop->deliveryAddress->countryCode ?>",
-																	"city":"<?php echo $shop->deliveryAddress->city ?>",
-																	"name":"<?php echo $shop->name ?>",
-																	"count":  <?php echo count($shop->openingHours);?>
-																	 
-																   }<?php echo $delimiter; ?>
+			<?php
+				$count = 1;
+				foreach($shops->servicePoints as $shop){
+					if(count($shop->openingHours)>0){
+				?>
 
-						<?php
-							$count++;
-						}
-						?>
-						}
-						return shops[id];
-					}
+					<div class="service_point" id="servicepoint_<?php echo $shop->servicePointId; ?>" style="display: none;">
+						<h3>Åbningstider for <?php echo $shop->name ?></h3>
+						<table>
+							<tr>
+								<th>Mandag</th><td><?php echo write_day('MO', $shop);?></td>
+							</tr>
+							<tr>
+								<th>Tirsdag</th><td><?php echo write_day('TU', $shop);?></td>
+							</tr>
+							<tr>
+								<th>Onsdag</th><td><?php echo write_day('WE', $shop);?></td>
+							</tr>
+							<tr>
+								<th>Torsdag</th><td><?php echo write_day('TH', $shop);?></td>
+							</tr>
+							<tr>
+								<th>Fredag</th><td><?php echo write_day('FR', $shop);?></td>
+							</tr>
+							<tr>
+								<th>Lørdag</th><td><?php echo write_day('SA', $shop);?></td>
+							</tr>
+							<tr>
+								<th>Søndag</th><td><?php echo write_day('SU', $shop);?></td>
+							</tr>
+						</table>
+					</div>
+					<div class="ws_hidden_form_fields">
+	                    <input type='hidden' name='dyn_street_<?php echo $shop->servicePointId; ?>' value="<?php echo $shop->deliveryAddress->streetName." ".$shop->deliveryAddress->streetNumber?>"/>
+	                    <input type='hidden' name='dyn_postal_code_<?php echo $shop->servicePointId; ?>' value="<?php echo $shop->deliveryAddress->postalCode ?>"/>
+	                    <input type='hidden' name='dyn_country_<?php echo $shop->servicePointId; ?>'/ value="<?php echo $shop->deliveryAddress->countryCode ?>">
+	                    <input type='hidden' name='dyn_city_<?php echo $shop->servicePointId; ?>' value="<?php echo $shop->deliveryAddress->city ?>"/>
+	                    <input type='hidden' name='dyn_name_<?php echo $shop->servicePointId; ?>' value="<?php echo $shop->name ?>"/>
+					</div>
+				<?php	
+					}	
+					$count++;
+				}
+				?>
+				<script>set_selection();</script>
 
-					function set_selection_hours(id){
-						var str = "";
-						var data = get_opening_hours(id); 
 
-						if(data["count"] > 0){
-							
-							str += "<h3>Åbningstider for valgte udleveringssted</h3>";
-							str += "<table>";
-							str += "<tr>";
-							str += "<th>Mandag</th><td>" + data["MO"] + "</td>";
-							str += "</tr><tr>";
-							str += "<th>Tirsdag</th><td>" + data["TU"] + "</td>";
-							str += "</tr><tr>";
-							str += "<th>Onsdag</th><td>" + data["WE"] + "</td>";
-							str += "</tr><tr>";
-							str += "<th>Torsdag</th><td>" + data["TH"] + "</td>";
-							str += "</tr><tr>";
-							str += "<th>Fredag</th><td>" + data["FR"] + "</td>";
-							str += "</tr><tr>";
-							str += "<th>Lørdag</th><td>" + data["SA"] + "</td>";
-							str += "</tr><tr>";
-							str += "<th>Søndag</th><td>" + data["SU"] + "</td>";
-							str += "</tr>";
-							str += "</table>";
 
-						}
-
-						str += "<input type='hidden' name='dyn_street' value='"+data["street"]+"' />";
-						str += "<input type='hidden' name='dyn_postal_code' value='"+data["postal_code"]+"' />";
-						str += "<input type='hidden' name='dyn_country' value='"+data["country"]+"' />";
-						str += "<input type='hidden' name='dyn_city' value='"+data["city"]+"' />";
-						str += "<input type='hidden' name='dyn_name' value='"+data["name"]+"' />";
-
-						jQuery("#pickup_info").html(str);
-					}
-
-					jQuery("#dynamic_destination_select").change(function(){
-						set_selection_hours(jQuery(this).find(":selected").val());
-					});
-					jQuery(document).ready(function(){
-						set_selection_hours(jQuery("#dynamic_destination_select").find(":selected").val());
-						var int=self.setInterval(set_selection_hours(jQuery("#dynamic_destination_select").find(":selected").val()), 3000);
-					});
-				</script>
 		</td>
 
 </tr>

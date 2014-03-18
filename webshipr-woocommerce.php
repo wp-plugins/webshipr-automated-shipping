@@ -5,7 +5,7 @@ Plugin URI: http://www.webshipr.com
 Description: Automated shipping for WooCommerce
 Author: webshipr.com
 Author URI: http://www.webshipr.com
-Version: 1.1.3
+Version: 1.1.4
 
 */
 
@@ -28,7 +28,8 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 
            protected $option_name = 'webshipr_options';
            protected $data = array(
-             'api_key' => ''
+             'api_key' => '',
+             'auto_process' => false
            );
         
            private $options;  
@@ -49,6 +50,11 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
                 add_action('admin_menu', array($this, 'add_page'));
                 add_action('woocommerce_review_order_after_shipping', array($this,'append_dynamic'));
                 add_action('woocommerce_checkout_order_processed', array($this, 'order_placed'));
+
+                // Autoprocess hook
+                add_action('woocommerce_thankyou', array($this, 'auto_process_order'));
+
+
                 register_activation_hook(__FILE__, array($this,'activate'));
 
 
@@ -57,19 +63,33 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 
            }
 
+           // Auto process
+           public function auto_process_order($order = 0){
+                if((int)$this->options['auto_process'] == 1 && (int)$order > 0){
+                    $woo_order = new WC_Order($order);
+                    $woo_method_array = reset($woo_order->get_shipping_methods());
+                    $ws_rate_id = (preg_match("/WS/", $woo_method_array["method_id"]) ? str_replace("WS", "", $woo_method_array["method_id"]) : -1);
+                    // Place order
+                    $this->WooOrderToWebshipr($woo_order, $ws_rate_id);
+                }
+                 
+           }
+
            // Order placed
            public function order_placed($order_id){
                 global $wpdb;
                 if(strlen($_POST["dynamic_destination"])>0){
                     $table_name = $wpdb->prefix . "webshipr";
+                    $prefix = $_POST["dynamic_destination"];
+
                     $wpdb->insert( $table_name, array( 'woo_order_id' => $order_id, 
                         'dynamic_pickup_identifier' => mysql_escape_string($_POST["dynamic_destination"]),
                         'shipping_method' => mysql_escape_string($_POST["shipping_method"]),
-                        'country_code' => mysql_escape_string($_POST["dyn_country"]),
-                        'address' => mysql_escape_string($_POST["dyn_street"]),
-                        'city' => mysql_escape_string($_POST["dyn_city"]),
-                        'postal_code' => mysql_escape_string($_POST["dyn_postal_code"]),
-                        'name' => mysql_escape_string($_POST["dyn_name"])
+                        'country_code' => mysql_escape_string($_POST["dyn_country_".$prefix]),
+                        'address' => mysql_escape_string($_POST["dyn_street_".$prefix]),
+                        'city' => mysql_escape_string($_POST["dyn_city_".$prefix]),
+                        'postal_code' => mysql_escape_string($_POST["dyn_postal_code_".$prefix]),
+                        'name' => mysql_escape_string($_POST["dyn_name_".$prefix])
                     ));
                 }
            }
@@ -135,10 +155,14 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
            // Get WS rate from WS shipping id
            private function get_rate_details($rate_id){
                 $api = $this->ws_api($this->options['api_key']);
-                foreach($api->GetShippingRates() as $rate){
-                    if( (int)$rate->id == (int)str_replace("WS","",$rate_id) ){
-                        return $rate;
+                if($api->CheckConnection()){
+                    foreach($api->GetShippingRates() as $rate){
+                        if( (int)$rate->id == (int)str_replace("WS","",$rate_id) ){
+                            return $rate;
+                        }
                     }
+                }else{
+                    return false;
                 }
            }
 
@@ -153,7 +177,7 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
                 add_options_page('webshipr options', 'Webshipr options', 'manage_options', 'webshipr_options', array($this, 'options'));
             }
 
-            // Print the menu page itself
+            // Print the settings menupage itself
             public function options() {
                 $options = get_option($this->option_name);
                 ?>
@@ -164,6 +188,12 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
                         <table class="form-table">
                             <tr valign="top"><th scope="row">Webshipr API key:</th>
                                 <td><input type="text" name="<?php echo $this->option_name?>[api_key]" value="<?php echo $options['api_key']; ?>" /></td>
+                            </tr>
+                            <tr valign="top"><th scope="row">Autoprocess shipments</th>
+                                <td>
+                                    <input type="checkbox" name="<?php echo $this->option_name?>[auto_process]" <?php echo (int)$options['auto_process'] == 1 ? "checked" : "" ?> />
+                                    <i>This setting is typically used if you have a warehouse integration. It means that it will automatically send the order to webshipr, when its created.</i>
+                                </td>
                             </tr>
                         </table>
                         <p class="submit">
@@ -179,6 +209,7 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 
                 $valid = array();
                 $valid['api_key'] = sanitize_text_field($input['api_key']);
+                $valid['auto_process'] = ($input['auto_process'] == 'on' ? true : false);
                 $api = $this->ws_api($valid['api_key']);
                 $check = $api->CheckConnection();
 
@@ -252,7 +283,7 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
                             
                             // If order in Webshipr is dispatched, then...
 
-                            if($ws_order->status == "dispatched"){
+                            if($ws_order->status == "dispatched" ||  $ws_order->status == "partly_dispatched"){
                                 
                                 if(strlen($ws_order->print_link)>1)
                                     echo "<tr><td>Print label </td><td><a href =\"". $ws_order->print_link . "\" target=\"_blank\">Click here</a></td></tr><br/>";
@@ -262,7 +293,9 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
                                     echo "<tr><td>Tracking</td><td><a href =\"". $ws_order->tracking_url . "\" target=\"_blank\">Click here</a></td></tr>";
 
                                 echo "<tr><td>Processed with: </td><td>".$this->get_rate_name($ws_order->shipping_rate_id,$rates)."</td></tr>";
-                            
+                            }else if($ws_order->status == "partner_processing" || $ws_order->status == "pending_partner" || $ws_order->status == "partner_waiting_for_stock"){
+
+                                echo "<tr><td>Processing with: </td><td>".$this->get_rate_name($ws_order->shipping_rate_id,$rates)."</td></tr>";
                             }else{
 
                                 // Order is in webshipr, but not processed correctly
@@ -506,9 +539,21 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
                     case "not_processed":
                         return "<font style='color: red; font-weight: bold;'>Not processed</font> <i> System error - please contact webshipr! </i>";
                         break;
-		          case "limit_exceeded":
+		            case "limit_exceeded":
 		    	        return "<font style='color: red; font-weight: bold;'>Limit exceeded</font> <i> please upgrade your subscription! </i>";
-		    	break;
+                        break;
+                    case "partner_processing":
+                        return "<font style='color: blue; font-weight: bold;'>Partner processing</font> <i> Partner is currently processing. </i>";
+		    	        break;
+                    case "pending_partner":
+                        return "<font style='color: blue; font-weight: bold;'>Pending partner</font> <i> Waiting for partner to process. </i>";
+                        break;
+                    case "partner_waiting_for_stock": 
+                        return "<font style='color: yellow; font-weight: bold;'>Partner waiting for stock</font> <i> Partner is waiting for stock. </i>";
+                        break;
+                    case "partly_dispatched":
+                        return "<font style='color: yellow; font-weight: bold;'>Partly dispatched</font> <i> Shipment is partly dispatched. </i>";
+                        break;
                     default: 
                         return $status;
                         break;

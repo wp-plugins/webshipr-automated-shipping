@@ -2,7 +2,7 @@
 Contributors: Webshipr 
 link: http://www.webshipr.dk
 Tags: shipping, valgfrit afhentningssted, automated shipping, post danmark, postdk, bluewater,blue water,woocommerce, automatic shipping, dropshipping, webshipr, webshipper 
-Stable tag: 1.1.3
+Stable tag: 1.1.4
 Requires at least: 3.7
 Tested up to: 3.8.1
 
@@ -19,7 +19,7 @@ It's free to try for 30 days. Sign up on http://www.webshipr.com.
 * Integrate Post Danmark
 * Integrate Post Danmark valgfrit afhentningssted
 * Integrate Blue Water shipping
-
+* Integrate With Warehouse partners
 -------------------------
 
 == Installation ==
@@ -38,4 +38,5 @@ It's free to try for 30 days. Sign up on http://www.webshipr.com.
 
 == Brief Version History ==
 
-* 1.1.3: Fixed issues for Woo Commerce 2.1.2 in regards to "Valgfrit afhentningssted" 
+* 1.1.3: Fixed issues for Woo Commerce 2.1.2 in regards to "Valgfrit afhentningssted"
+* 1.1.4: Can now work with warehouse partners. And improvements for "Valgfrit afhentningssted" 
