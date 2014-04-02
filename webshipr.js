@@ -11,9 +11,7 @@ jQuery(function(){
 	}); 
 });
         function set_selection(){
-                jQuery("#dynamic_destination_select").change(function(){
-                        jQuery(".service_point").hide();
-                        jQuery("#servicepoint_"+jQuery("#dynamic_destination_select").val()).show();
-                });
+            jQuery(".service_point").hide();
+            jQuery("#servicepoint_"+jQuery("#dynamic_destination_select").val()).show();
         }
 

@@ -5,7 +5,7 @@ Plugin URI: http://www.webshipr.com
 Description: Automated shipping for WooCommerce
 Author: webshipr.com
 Author URI: http://www.webshipr.com
-Version: 1.1.4
+Version: 1.1.5
 
 */
 
@@ -144,6 +144,9 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
                         switch($this_rate->carrier_code){
                             case "POSTDK":
                                 require 'postdk_pickadr.php';
+                                break;
+                            case "GLS": 
+                                require 'gls_pickadr.php';
                                 break;
                         }
 
