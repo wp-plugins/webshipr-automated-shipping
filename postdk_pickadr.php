@@ -1,22 +1,8 @@
 <?php 
 
 	$api 	 = $this->ws_api($this->options['api_key']);
-	parse_str($_POST["post_data"], $post_data);
 	
-	// Check if specific shipping address specified
-	if((string)$post_data["shiptobilling"] == "1" || (string)$post_data["ship_to_different_address"] != "1"){
-		$street  = preg_split('/(?=\d)/', $_POST["address"]);
-		$street  = $street[0];
-		$number  = filter_var($_POST["address"], FILTER_SANITIZE_NUMBER_INT);
-		$country = $_POST["country"];
-		$postal  = $_POST["postcode"];
-	}else{
-		$street  = preg_split('/(?=\d)/', $post_data["shipping_address_1"]);
-		$street  = $street[0];
-		$number  = filter_var($post_data["shipping_address_1"], FILTER_SANITIZE_NUMBER_INT);
-		$country = $post_data["shipping_country"];
-		$postal  = $post_data["shipping_postcode"];
-	}
+        $number  = filter_var($street, FILTER_SANITIZE_NUMBER_INT); 
 
 	$shops   = $api->GetPostDKShops($country, $street, $number, $postal);
 

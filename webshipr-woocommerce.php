@@ -5,7 +5,7 @@ Plugin URI: http://www.webshipr.com
 Description: Automated shipping for WooCommerce
 Author: webshipr.com
 Author URI: http://www.webshipr.com
-Version: 1.1.5
+Version: 1.1.6
 
 */
 
@@ -125,9 +125,18 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 
            // Method to handle dynamic pickup places
            public function append_dynamic(){
+		global $woocommerce;
 
-                // Woo commerce changed API. So check if string or array returned
-                if(is_array($_POST["shipping_method"])){
+		$address = $woocommerce->session->customer;
+
+		$street = $address["shipping_address"];
+		$postal = $address["shipping_postcode"];
+		$city = $address["shipping_city"];
+		$country = $address["shipping_country"];
+                
+                if(is_array($woocommerce->session->chosen_shipping_methods)){
+			$rate_id = $woocommerce->session->chosen_shipping_methods[0]; 
+		}elseif(is_array($_POST["shipping_method"])){
                         $rate_id = $_POST["shipping_method"][0];
                 }elseif(is_string($_POST["shipping_method"])){
                         $rate_id = $_POST["shipping_method"];

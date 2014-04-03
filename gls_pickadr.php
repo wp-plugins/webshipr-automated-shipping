@@ -2,21 +2,6 @@
         require_once('ParcelShop.php');
        
         
-	parse_str($_POST["post_data"], $post_data);
-	
-	// Check if specific shipping address specified
-	if((string)$post_data["shiptobilling"] == "1" || (string)$post_data["ship_to_different_address"] != "1"){
-		$street  = $_POST["address"];
-		$number  = filter_var($_POST["address"], FILTER_SANITIZE_NUMBER_INT);
-		$country = $_POST["country"];
-		$postal  = $_POST["postcode"];
-	}else{
-		$street  = $post_data["shipping_address_1"];
-		$number  = filter_var($post_data["shipping_address_1"], FILTER_SANITIZE_NUMBER_INT);
-		$country = $post_data["shipping_country"];
-		$postal  = $post_data["shipping_postcode"];
-	}
-        
         // Get associated shops
         $api = new ParcelShopDK();
 	$shops = $api->getShopNear($street, $postal, 5); 
