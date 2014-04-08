@@ -5,7 +5,7 @@ Plugin URI: http://www.webshipr.com
 Description: Automated shipping for WooCommerce
 Author: webshipr.com
 Author URI: http://www.webshipr.com
-Version: 1.1.6
+Version: 1.1.7
 
 */
 
@@ -261,8 +261,17 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
                 $api = $this->ws_api($this->options['api_key']);
                 $woo_order = new WC_Order($_GET["post"]);
                 $rates = $api->GetShippingRates($woo_order->get_total());
-                $woo_method_array = reset($woo_order->get_shipping_methods());
-                $ws_rate_id = (preg_match("/WS/", $woo_method_array["method_id"]) ? str_replace("WS", "", $woo_method_array["method_id"]) : -1);
+                
+                // Depending on woocommerce version, get the shipping method
+                if(method_exists($woo_order, 'get_shipping_methods')){
+                        $woo_method_array = reset($woo_order->get_shipping_methods());
+                        $woo_order_id = $woo_method_array["method_id"];
+                }else{
+                        $woo_order_id = $woo_order->shipping_method;
+                }
+
+                $ws_rate_id = (preg_match("/WS/", $woo_order_id) ? str_replace("WS", "", $woo_order_id) : -1);
+
                 $rate_name = $this->get_rate_name($ws_rate_id,$rates);
 
                 // If user tried to process or reprocess - handle this.

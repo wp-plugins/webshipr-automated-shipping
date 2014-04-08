@@ -1,9 +1,7 @@
 <?php 
 
 	$api 	 = $this->ws_api($this->options['api_key']);
-	
-        $number  = filter_var($street, FILTER_SANITIZE_NUMBER_INT); 
-
+    $number  = filter_var($street, FILTER_SANITIZE_NUMBER_INT); 
 	$shops   = $api->GetPostDKShops($country, $street, $number, $postal);
 
 
@@ -33,6 +31,11 @@
 <tr>
 		<th colspan="2"> Vælg nærmeste afhentningssted </th>
 </tr>
+<?php 
+
+if(count($shops->servicePoints)>0){
+
+?>
 <tr>
 		<td colspan="2" > 
 			<select name="dynamic_destination" id="dynamic_destination_select" style="width: auto;">
@@ -91,10 +94,10 @@
 				}
 				?>
 				<script>set_selection();</script>
-
-
-
 		</td>
 
 </tr>
+<?php }else{ ?>
+    <tr><td colspan="2">Ingen afhentningssteder fundet for den indtastede adresse.</td></tr>
+<?php } ?>
 
