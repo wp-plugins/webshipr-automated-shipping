@@ -5,7 +5,7 @@ Plugin URI: http://www.webshipr.com
 Description: Automated shipping for WooCommerce
 Author: webshipr.com
 Author URI: http://www.webshipr.com
-Version: 1.1.7
+Version: 1.1.8
 
 */
 
