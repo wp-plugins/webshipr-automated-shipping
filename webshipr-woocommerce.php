@@ -5,7 +5,7 @@ Plugin URI: http://www.webshipr.com
 Description: Automated shipping for WooCommerce
 Author: webshipr.com
 Author URI: http://www.webshipr.com
-Version: 1.1.8
+Version: 1.1.9
 
 */
 
@@ -51,6 +51,9 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
                 add_action('woocommerce_review_order_after_shipping', array($this,'append_dynamic'));
                 add_action('woocommerce_checkout_order_processed', array($this, 'order_placed'));
 
+                // If dynamic address picked, replace delivery address.
+                add_action('woocommerce_order_details_after_customer_details', array($this, 'delivery_addr_confirmation'));
+
                 // Autoprocess hook
                 add_action('woocommerce_thankyou', array($this, 'auto_process_order'));
 
@@ -62,6 +65,33 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
                 $this->options = get_settings('webshipr_options');
 
            }
+
+           // Replace delivery address if dynamic address picked
+           public function delivery_addr_confirmation($order){
+                global $wpdb;
+                $dyn_adr = $wpdb->get_row("SELECT * FROM ".$this->ws_table()." WHERE woo_order_id = ".$order->id);
+                if($dyn_adr){
+                        $html = '<header class="title">';
+                        $html .= '<h3>Afhentningsadresse</h3>';
+                        $html .= '</header>';
+                        $html .= '<address>';
+                        $html .= '<p>';
+                        $html .= $dyn_adr->name;
+                        $html .= '<br>';
+                        $html .= $dyn_adr->address;
+                        $html .= '<br>';
+                        $html .= $dyn_adr->postal_code." ".$dyn_adr->city;
+                        $html .= '</p>';
+                        $html .= '</address>';
+                ?>
+                <script>
+                    jQuery(document).ready(function(){
+                            jQuery(".addresses .col-2").html('<?php echo $html; ?>');
+                    });
+                </script>
+                <?php
+                }
+            }
 
            // Auto process
            public function auto_process_order($order = 0){
@@ -633,10 +663,14 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
                     if($rates){
                         foreach($rates as $rate){
                             if($this->country_accepted($rate, $destination)){
+
+                                // Make and add the rate
                                 $new_rate = array(
                                     'id' => "WS".$rate->id,
                                     'label' => $rate->name,
-                                    'cost' => $rate->price
+                                    'cost' => $rate->price,
+                                    'taxes' => ($rate->tax_percent > 0 ? '' : false), 
+                                    'calc_tax' => 'per_order'
                                 );
                                 $this->add_rate( $new_rate );
                             }
