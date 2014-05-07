@@ -6,7 +6,7 @@ Plugin URI: http://www.webshipr.com
 Description: Automated shipping for WooCommerce
 Author: webshipr.com
 Author URI: http://www.webshipr.com
-Version: 1.2.0
+Version: 1.2.1
 
 */
 
@@ -96,9 +96,18 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
                     $table_name = $wpdb->prefix . "webshipr";
                     $prefix = $_POST["dynamic_destination"];
 
+
+                    if(is_array($_POST["shipping_method"])){
+                            $rate_id = $_POST["shipping_method"][0];
+                    }elseif(is_string($_POST["shipping_method"])){
+                            $rate_id = $_POST["shipping_method"];
+                    }else{
+                            $rate_id = "not_known";
+                    }
+
                     $wpdb->insert( $table_name, array( 'woo_order_id' => $order_id, 
                         'dynamic_pickup_identifier' => mysql_escape_string($_POST["dynamic_destination"]),
-                        'shipping_method' => mysql_escape_string($_POST["shipping_method"] ? $_POST["shipping_method"] : "-"),
+                        'shipping_method' => mysql_escape_string($rate_id),
                         'country_code' => mysql_escape_string($_POST["dyn_country_".$prefix]),
                         'address' => mysql_escape_string($_POST["dyn_street_".$prefix]),
                         'city' => mysql_escape_string($_POST["dyn_city_".$prefix]),
