@@ -578,7 +578,7 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
                 $deliv_adr->Address1 = $woo_order->shipping_address_1;
                 $deliv_adr->Address2 = $woo_order->shipping_address_2;
                 $deliv_adr->City = $woo_order->shipping_city;
-                $deliv_adr->ContactName = $woo_order->shipping_first_name . " " . $woo_order->billing_last_name;
+                $deliv_adr->ContactName = $woo_order->shipping_first_name . " " . $woo_order->shipping_last_name;
                 $deliv_adr->ContactName2 = $woo_order->shipping_company;
                 $deliv_adr->CountryCode = $woo_order->shipping_country;
                 $deliv_adr->EMail = $woo_order->billing_email;
