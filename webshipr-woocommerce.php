@@ -1,11 +1,12 @@
 <?php
 /*
+
 Plugin Name: Webshipr for WooCommerce
 Plugin URI: http://www.webshipr.com
 Description: Automated shipping for WooCommerce
 Author: webshipr.com
 Author URI: http://www.webshipr.com
-Version: 1.1.9
+Version: 1.2.0
 
 */
 
@@ -51,8 +52,6 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
                 add_action('woocommerce_review_order_after_shipping', array($this,'append_dynamic'));
                 add_action('woocommerce_checkout_order_processed', array($this, 'order_placed'));
 
-                // If dynamic address picked, replace delivery address.
-                add_action('woocommerce_order_details_after_customer_details', array($this, 'delivery_addr_confirmation'));
 
                 // Autoprocess hook
                 add_action('woocommerce_thankyou', array($this, 'auto_process_order'));
@@ -66,32 +65,6 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 
            }
 
-           // Replace delivery address if dynamic address picked
-           public function delivery_addr_confirmation($order){
-                global $wpdb;
-                $dyn_adr = $wpdb->get_row("SELECT * FROM ".$this->ws_table()." WHERE woo_order_id = ".$order->id);
-                if($dyn_adr){
-                        $html = '<header class="title">';
-                        $html .= '<h3>Afhentningsadresse</h3>';
-                        $html .= '</header>';
-                        $html .= '<address>';
-                        $html .= '<p>';
-                        $html .= $dyn_adr->name;
-                        $html .= '<br>';
-                        $html .= $dyn_adr->address;
-                        $html .= '<br>';
-                        $html .= $dyn_adr->postal_code." ".$dyn_adr->city;
-                        $html .= '</p>';
-                        $html .= '</address>';
-                ?>
-                <script>
-                    jQuery(document).ready(function(){
-                            jQuery(".addresses .col-2").html('<?php echo $html; ?>');
-                    });
-                </script>
-                <?php
-                }
-            }
 
            // Auto process
            public function auto_process_order($order = 0){
@@ -108,19 +81,92 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
            // Order placed
            public function order_placed($order_id){
                 global $wpdb;
+
+                
+                /*  
+                    Yes.. This section is abit clumpsy
+                    Address is stored in two tables, due to a change in the plugin.
+                    Never the less. We need to update all shipping address attributes in order to 
+                    send the correct address in emails and on the order confirmation page.
+                */
+                
+
+
                 if(strlen($_POST["dynamic_destination"])>0){
                     $table_name = $wpdb->prefix . "webshipr";
                     $prefix = $_POST["dynamic_destination"];
 
                     $wpdb->insert( $table_name, array( 'woo_order_id' => $order_id, 
                         'dynamic_pickup_identifier' => mysql_escape_string($_POST["dynamic_destination"]),
-                        'shipping_method' => mysql_escape_string($_POST["shipping_method"]),
+                        'shipping_method' => mysql_escape_string($_POST["shipping_method"] ? $_POST["shipping_method"] : "-"),
                         'country_code' => mysql_escape_string($_POST["dyn_country_".$prefix]),
                         'address' => mysql_escape_string($_POST["dyn_street_".$prefix]),
                         'city' => mysql_escape_string($_POST["dyn_city_".$prefix]),
                         'postal_code' => mysql_escape_string($_POST["dyn_postal_code_".$prefix]),
                         'name' => mysql_escape_string($_POST["dyn_name_".$prefix])
                     ));
+
+                    // Update delivery address in wpdb
+
+                    // Company
+                    $wpdb->update( 
+                                $wpdb->prefix . 'postmeta', 
+                                array( 
+                                    'meta_value' =>  mysql_escape_string($_POST["dyn_name_".$prefix]),
+                                ), 
+                                array( 'post_id' => $order_id, 'meta_key' => '_shipping_company' ));
+
+
+                    // Country
+                    $wpdb->update( 
+                                $wpdb->prefix . 'postmeta', 
+                                array( 
+                                    'meta_value' =>  mysql_escape_string($_POST["dyn_country_".$prefix]),
+                                ), 
+                                array( 'post_id' => $order_id, 'meta_key' => '_shipping_country' ));
+                    // _shipping_address_1
+                    $wpdb->update( 
+                                $wpdb->prefix . 'postmeta', 
+                                array( 
+                                    'meta_value' =>  mysql_escape_string($_POST["dyn_street_".$prefix]),
+                                ), 
+                                array( 'post_id' => $order_id, 'meta_key' => '_shipping_address_1' ));
+                    // clear _shipping_address_2
+                    $wpdb->update( 
+                                $wpdb->prefix . 'postmeta', 
+                                array( 
+                                    'meta_value' =>  '',
+                                ), 
+                                array( 'post_id' => $order_id, 'meta_key' => '_shipping_address_2' ));
+
+                    // _shipping_postcode
+                    $wpdb->update( 
+                                $wpdb->prefix . 'postmeta', 
+                                array( 
+                                    'meta_value' =>  mysql_escape_string($_POST["dyn_postal_code_".$prefix]),
+                                ), 
+                                array( 'post_id' => $order_id, 'meta_key' => '_shipping_postcode' ));
+                    // _shipping_city
+                    $wpdb->update( 
+                                $wpdb->prefix . 'postmeta', 
+                                array( 
+                                    'meta_value' =>  mysql_escape_string($_POST["dyn_city_".$prefix]),
+                                ), 
+                                array( 'post_id' => $order_id, 'meta_key' => '_shipping_city' ));
+
+                    // reset names
+                    $wpdb->update( 
+                                $wpdb->prefix . 'postmeta', 
+                                array( 
+                                    'meta_value' =>  '',
+                                ), 
+                                array( 'post_id' => $order_id, 'meta_key' => '_shipping_first_name' ));
+                                        $wpdb->update( 
+                    $wpdb->prefix . 'postmeta', 
+                                array( 
+                                    'meta_value' =>  '',
+                                ), 
+                                array( 'post_id' => $order_id, 'meta_key' => '_shipping_last_name' ));
                 }
            }
 
@@ -547,6 +593,12 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
                 // Check if the order has a dynamic address
                 $dynamic_order = $wpdb->get_row("SELECT * FROM ".$this->ws_table()." WHERE woo_order_id = ".$woo_order->id);
                 if($dynamic_order){
+
+                    // reset email and phone for delivery 
+                    $deliv_adr->EMail = '';
+                    $deliv_adr->Phone = '';
+
+                    // define dyn adr
                     $dynamic_adr = new ShipmentAddress();
                     $dynamic_adr->Address1 = $dynamic_order->address;
                     $dynamic_adr->City = $dynamic_order->city;
@@ -710,6 +762,4 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 
 
 }
-
-
 ?>

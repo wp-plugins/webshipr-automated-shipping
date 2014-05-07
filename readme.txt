@@ -47,3 +47,4 @@ It's free to try for 30 days. Sign up on http://www.webshipr.com.
 * 1.1.7: Fixed compatibility to Woocommerce 2.0
 * 1.1.8: Fixed javascript compliance issue for some themes.
 * 1.1.9: Improved rate VAT calculations and replaced confirmation address with with dynamic address. 
+* 1.2.0: Shipping delivery address replaced with pickup place for GLS Pakkeshop and Postdanmark valgfriafhentning.
