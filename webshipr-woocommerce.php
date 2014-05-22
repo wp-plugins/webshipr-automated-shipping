@@ -6,7 +6,7 @@ Plugin URI: http://www.webshipr.com
 Description: Automated shipping for WooCommerce
 Author: webshipr.com
 Author URI: http://www.webshipr.com
-Version: 1.2.2
+Version: 1.2.3
 
 */
 
@@ -51,13 +51,15 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
                 add_action('admin_menu', array($this, 'add_page'));
                 add_action('woocommerce_review_order_after_shipping', array($this,'append_dynamic'));
                 add_action('woocommerce_checkout_order_processed', array($this, 'order_placed'));
-             
+                add_action('woocommerce_checkout_update_order_meta', array($this, 'override_delivery'));
+
 
                 // Hook ajax methods
                 add_action("wp_ajax_nopriv_check_rates", array($this, "check_rates"));
                 add_action( 'wp_ajax_check_rates', array($this, 'check_rates') );
                 wp_localize_script( 'check_rates', 'wsAjax', array( 'ajaxurl' => admin_url( 'admin-ajax.php' ))); 
                 add_action('woocommerce_after_checkout_shipping_form', array($this, 'set_ajaxurl')); 
+
 
                 // Autoprocess hook
                 add_action('woocommerce_thankyou', array($this, 'auto_process_order'));
@@ -80,6 +82,18 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
                         ws_ajax_url = '<?php echo admin_url('admin-ajax.php'); ?>';
                 </script>
             <?php
+           }
+
+           // Override delivery info
+           public function override_delivery($order_id){
+                $prefix = $_POST["dynamic_destination"];
+                update_post_meta( $order_id, '_shipping_first_name', '');
+                update_post_meta( $order_id, '_shipping_last_name', '');
+                update_post_meta( $order_id, '_shipping_address_1', $_POST["dyn_street_".$prefix]);
+                update_post_meta( $order_id, '_shipping_address_2', '');
+                update_post_meta( $order_id, '_shipping_company', $_POST["dyn_name_".$prefix]);
+                update_post_meta( $order_id, '_shipping_city', $_POST["dyn_city_".$prefix]);
+                update_post_meta( $order_id, '_shipping_postcode', $_POST["dyn_postal_code_".$prefix]);
            }
 
            // Is rate dynamic, Ajax
@@ -118,14 +132,6 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
            // Order placed
            public function order_placed($order_id){
                 global $wpdb;
-
-                
-                /*  
-                    Yes.. This section is abit clumpsy
-                    Address is stored in two tables, due to a change in the plugin.
-                    Never the less. We need to update all shipping address attributes in order to 
-                    send the correct address in emails and on the order confirmation page.
-                */
                 
 
 
@@ -152,69 +158,8 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
                         'name' => mysql_escape_string($_POST["dyn_name_".$prefix])
                     ));
 
-                    // Update delivery address in wpdb
-
-                    // Company
-                    $wpdb->update( 
-                                $wpdb->prefix . 'postmeta', 
-                                array( 
-                                    'meta_value' =>  mysql_escape_string($_POST["dyn_name_".$prefix]),
-                                ), 
-                                array( 'post_id' => $order_id, 'meta_key' => '_shipping_company' ));
-
-
-                    // Country
-                    $wpdb->update( 
-                                $wpdb->prefix . 'postmeta', 
-                                array( 
-                                    'meta_value' =>  mysql_escape_string($_POST["dyn_country_".$prefix]),
-                                ), 
-                                array( 'post_id' => $order_id, 'meta_key' => '_shipping_country' ));
-                    // _shipping_address_1
-                    $wpdb->update( 
-                                $wpdb->prefix . 'postmeta', 
-                                array( 
-                                    'meta_value' =>  mysql_escape_string($_POST["dyn_street_".$prefix]),
-                                ), 
-                                array( 'post_id' => $order_id, 'meta_key' => '_shipping_address_1' ));
-                    // clear _shipping_address_2
-                    $wpdb->update( 
-                                $wpdb->prefix . 'postmeta', 
-                                array( 
-                                    'meta_value' =>  '',
-                                ), 
-                                array( 'post_id' => $order_id, 'meta_key' => '_shipping_address_2' ));
-
-                    // _shipping_postcode
-                    $wpdb->update( 
-                                $wpdb->prefix . 'postmeta', 
-                                array( 
-                                    'meta_value' =>  mysql_escape_string($_POST["dyn_postal_code_".$prefix]),
-                                ), 
-                                array( 'post_id' => $order_id, 'meta_key' => '_shipping_postcode' ));
-                    // _shipping_city
-                    $wpdb->update( 
-                                $wpdb->prefix . 'postmeta', 
-                                array( 
-                                    'meta_value' =>  mysql_escape_string($_POST["dyn_city_".$prefix]),
-                                ), 
-                                array( 'post_id' => $order_id, 'meta_key' => '_shipping_city' ));
-
-                    // reset names
-                    $wpdb->update( 
-                                $wpdb->prefix . 'postmeta', 
-                                array( 
-                                    'meta_value' =>  '',
-                                ), 
-                                array( 'post_id' => $order_id, 'meta_key' => '_shipping_first_name' ));
-                                        $wpdb->update( 
-                    $wpdb->prefix . 'postmeta', 
-                                array( 
-                                    'meta_value' =>  '',
-                                ), 
-                                array( 'post_id' => $order_id, 'meta_key' => '_shipping_last_name' ));
                 }
-           }
+            }
 
            // Create Webshipr table to store pickup places for orders
            private function create_table(){
