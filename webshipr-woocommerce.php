@@ -6,7 +6,7 @@ Plugin URI: http://www.webshipr.com
 Description: Automated shipping for WooCommerce
 Author: webshipr.com
 Author URI: http://www.webshipr.com
-Version: 1.2.1
+Version: 1.2.2
 
 */
 
@@ -51,7 +51,13 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
                 add_action('admin_menu', array($this, 'add_page'));
                 add_action('woocommerce_review_order_after_shipping', array($this,'append_dynamic'));
                 add_action('woocommerce_checkout_order_processed', array($this, 'order_placed'));
+             
 
+                // Hook ajax methods
+                add_action("wp_ajax_nopriv_check_rates", array($this, "check_rates"));
+                add_action( 'wp_ajax_check_rates', array($this, 'check_rates') );
+                wp_localize_script( 'check_rates', 'wsAjax', array( 'ajaxurl' => admin_url( 'admin-ajax.php' ))); 
+                add_action('woocommerce_after_checkout_shipping_form', array($this, 'set_ajaxurl')); 
 
                 // Autoprocess hook
                 add_action('woocommerce_thankyou', array($this, 'auto_process_order'));
@@ -65,6 +71,37 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 
            }
 
+
+           // Set ajax url in checkout
+           public function set_ajaxurl(){
+
+            ?>
+                <script type="text/javascript">
+                        ws_ajax_url = '<?php echo admin_url('admin-ajax.php'); ?>';
+                </script>
+            <?php
+           }
+
+           // Is rate dynamic, Ajax
+           public function check_rates(){
+                // Get Rate
+                $rate_id = mysql_escape_string($_REQUEST['rate_id']); 
+                $api = $this->ws_api($this->options['api_key']);
+                $rates = $api->GetShippingRates(); 
+                $is_dyn_required = false; 
+
+                // Loop through rates, and check if the rate is dyn
+                if(is_array($rates)){
+                    foreach($rates as $rate){
+                        if($rate->dynamic_pickup && (("WS".$rate->id) == $rate_id)){
+                            $is_dyn_required = true; 
+                        }
+                    }  
+                }
+
+                // Send response
+                wp_send_json_success(array("rate" => $_REQUEST['rate_id'], "dyn" => $is_dyn_required));
+           }
 
            // Auto process
            public function auto_process_order($order = 0){
