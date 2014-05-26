@@ -22,7 +22,7 @@ class ParcelShopDK{
                 array_pop($query_street);
             }
             if(count($query_street) == 0){
-                return false;
+                break;
             }
             $tmp_result = $this->queryAddress(implode(' ', $query_street), $zip, $amount);
             if($tmp_result){
@@ -30,9 +30,28 @@ class ParcelShopDK{
             }
             $attempts++;
         }
-        return $result;
+        // If we didnt get more than one, query by zip
+        if(is_array($result) && count($result) > 1){
+          return $result; 
+        }else{
+          return $this->queryZip($zip);
+        }
    }
 
+   // Just query ZIP
+   private function queryZip($zipcode){
+      $shops = $this->soapclient->GetParcelShopsInZipcode(array('zipcode' => $zipcode));
+      if(isset($shops->GetParcelShopsInZipcodeResult->PakkeshopData))
+      {
+        if(!is_array($shops->GetParcelShopsInZipcodeResult->PakkeshopData)){ 
+          return array($shops->GetParcelShopsInZipcodeResult->PakkeshopData);
+        }else{
+          return $shops->GetParcelShopsInZipcodeResult->PakkeshopData;
+        }
+      
+      }
+      return array(); 
+   }
 
    // Try and query
    private function queryAddress($street, $zip, $amount){

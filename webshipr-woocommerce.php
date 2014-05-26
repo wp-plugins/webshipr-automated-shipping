@@ -6,7 +6,7 @@ Plugin URI: http://www.webshipr.com
 Description: Automated shipping for WooCommerce
 Author: webshipr.com
 Author URI: http://www.webshipr.com
-Version: 1.2.4
+Version: 1.2.5
 
 */
 
@@ -38,6 +38,7 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 
            // Constructor to be initialized
            public function __construct() {
+                global $woocommerce;
 
                 // Add JS and CSS
                 wp_register_script("ws_js", plugins_url("webshipr.js", __FILE__));
@@ -47,9 +48,16 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 
                 // Hook actions
                 add_action('woocommerce_admin_order_data_after_order_details', array($this,'show_on_order'));
+
+                if ( version_compare( $woocommerce->version, '2.1', '<' ) ) {
+                    add_action('woocommerce_review_order_after_order_total', array($this,'append_dynamic'));
+                }else{
+                    add_action('woocommerce_review_order_before_payment', array($this,'append_dynamic'));
+                }
+
                 add_action('admin_init', array($this, 'admin_init'));
                 add_action('admin_menu', array($this, 'add_page'));
-                add_action('woocommerce_review_order_after_shipping', array($this,'append_dynamic'));
+                //add_action('woocommerce_review_order_after_shipping', array($this,'append_dynamic'));
                 add_action('woocommerce_checkout_order_processed', array($this, 'order_placed'));
                 add_action('woocommerce_checkout_update_order_meta', array($this, 'override_delivery'));
                 add_action('woocommerce_checkout_process', array($this, 'validate_on_process')); 
@@ -223,23 +231,30 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
            public function append_dynamic(){
 		      global $woocommerce;
 
-		      $address = $woocommerce->session->customer;
+		      parse_str($_POST["post_data"], $parsed);
+              if($parsed["ws_search_street"] || $parsed["ws_search_zip"]){
+                  $street = $parsed["ws_search_street"]; 
+                  $postal = $parsed["ws_search_zip"];
+                  $city = ''; 
+                  $country = 'DK'; 
+              }else{
+                  $address = $woocommerce->session->customer;
+    		      $street = $address["shipping_address"];
+    		      $postal = $address["shipping_postcode"];
+    		      $city = $address["shipping_city"];
+    		      $country = $address["shipping_country"];
+              }
 
-		      $street = $address["shipping_address"];
-		      $postal = $address["shipping_postcode"];
-		      $city = $address["shipping_city"];
-		      $country = $address["shipping_country"];
-                
                 if(is_array($woocommerce->session->chosen_shipping_methods)){
-			      $rate_id = $woocommerce->session->chosen_shipping_methods[0]; 
-		        }elseif(is_array($_POST["shipping_method"])){
+    		      $rate_id = $woocommerce->session->chosen_shipping_methods[0]; 
+    	        }elseif(is_array($_POST["shipping_method"])){
                         $rate_id = $_POST["shipping_method"][0];
                 }elseif(is_string($_POST["shipping_method"])){
                         $rate_id = $_POST["shipping_method"];
                 }else{
                         $rate_id = "not_known";
                 }
-                
+            
                 // Is it a webshipr rate at all?
                 if(preg_match( "/WS/", $rate_id )){
                     $this_rate = $this->get_rate_details($rate_id);
@@ -388,7 +403,7 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
                 // Check if connected to webshipr
                 if($api->CheckConnection()){
 
-                    # Need this later again.
+                    // Need this later again.
                     $exists = $api->OrderExists($woo_order->id);
 
                     // Check if order exists in WS
@@ -726,17 +741,20 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 
                 // Calculate shipping rates
                 public function calculate_shipping( $package ) {
-                    
+                    global $woocommerce;
+
                     $total = $package["contents_cost"];
                     $api = $this->ws_api($this->options['api_key']);
                     $rates = $api->GetShippingRates($total);
                     $destination  = $package["destination"]["country"];
+                    $cart_weight = $woocommerce->cart->cart_contents_weight * 1000;
 
                     // If any rates were found
                     if($rates){
                         foreach($rates as $rate){
-                            if($this->country_accepted($rate, $destination)){
-
+                            if($this->country_accepted($rate, $destination) && 
+                                $rate->max_weight >= $cart_weight && $rate->min_weight <= $cart_weight){
+                                 
                                 // Make and add the rate
                                 $new_rate = array(
                                     'id' => "WS".$rate->id,
