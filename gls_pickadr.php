@@ -33,22 +33,25 @@
 				<input name="ws_search_street" placeholder="Vejnavn og nummer" class="input-text" value="<?php echo $street?>">
 				<input name="ws_search_zip" placeholder ="Postnr." size="3" class="input-text" value="<?php echo $postal?>">
 				<input type="button" class="wc-forward btn alt" value="Find shops"  onClick="update_shipping_methods();">
-				
 			</td>
 		</tr>
         <?php 
         if($shops){
         ?>   
         <tr>
-		<td colspan="2" > 
-			<select name="dynamic_destination" id="dynamic_destination_select" onchange="set_selection()" onload="set_selection()" style="width: auto;">
-				<?php foreach($shops as $shop){ ?>
-					<option value="<?php echo trim($shop->Number)?>">
-						<?php echo $shop->CompanyName ?> - <?php echo $shop->Streetname ?>
-						(<?php echo $shop->ZipCode . " " . $shop->CityName ?>)
-					</option>
-				<?php } ?>
-			</select>
+			<td colspan="2" > 
+				<select name="dynamic_destination" id="dynamic_destination_select" onchange="set_selection()" onload="set_selection()" style="width: auto;">
+					<?php foreach($shops as $shop){ ?>
+						<option value="<?php echo trim($shop->Number)?>">
+							<?php echo $shop->CompanyName ?> - <?php echo $shop->Streetname ?>
+							(<?php echo $shop->ZipCode . " " . $shop->CityName ?>)
+						</option>
+					<?php } ?>
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<td colspan="2">
 			<div id="pickup_info">
 
 			</div>

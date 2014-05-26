@@ -59,6 +59,10 @@
 							</option>
 						<?php } ?>
 					</select>
+					</td>
+		</tr>
+		<tr>
+			<td colspan="2">
 					<div id="pickup_info">
 
 					</div>
