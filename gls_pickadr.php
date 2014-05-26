@@ -112,3 +112,23 @@
         <?php } ?>
    </tbody>
 </table>
+
+<script>
+		jQuery("#ws_search_street").live("keypress", function(e) {
+			if (e.keyCode == 13) {
+				e.preventDefault(); 
+				update_shipping_methods(); 
+				return false; 
+			}
+		}); 
+
+
+		jQuery("#ws_search_zip").live("keypress", function(e) {
+			if (e.keyCode == 13) {
+				e.preventDefault(); 
+				update_shipping_methods(); 
+				return false; 
+			}
+		}); 
+</script>
+
