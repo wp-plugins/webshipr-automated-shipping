@@ -1,5 +1,6 @@
 
 var ws_ajax_url = ""; 
+
 // Bool if dynamic rate is picked
 function dynamic_picked(){
 
@@ -20,6 +21,17 @@ function dynamic_picked(){
     return result; 
 }
 
+// Is address filled? 
+function is_address_filled(){
+	if ( jQuery("#billing_address_1").val().length > 0 && 
+		 jQuery("#billing_postcode").val().length > 0 && 
+		 jQuery("#billing_city").val().length > 0){
+		return true; 
+	} else{
+		return false; 
+	}
+}
+
 
 // Is a shop selected?
 function shop_selected(){
@@ -36,6 +48,9 @@ function shop_selected(){
 }
 
 
+function update_shipping_methods(){
+	if(is_address_filled()){jQuery("body").trigger('update_checkout');}
+}
 
 
 jQuery(function(){
@@ -45,25 +60,21 @@ jQuery(function(){
 
 	jQuery(document).ready(function(){
 
-		// Listen on blur for phone
+		// Listen on blur
+		jQuery("#billing_city").blur(function(){
+    			update_shipping_methods(); 
+		});
+		jQuery("#billing_postcode").blur(function(){
+    			update_shipping_methods(); 
+		});
+		jQuery("#billing_address_1").blur(function(){
+    			update_shipping_methods(); 
+		});
 		jQuery("#billing_phone").blur(function(){
-    			jQuery("body").trigger('update_checkout');
+    			update_shipping_methods(); 
 		});
 
-	
 
-		jQuery("#place_order").live('click',function(e){
-
-			// Figure out if a pickup address is defined
-			if(dynamic_picked() === true && shop_selected() === false){
-				e.preventDefault(); 
-				jQuery("body").trigger('update_checkout');
-				jQuery('html,body').animate({
-						 scrollTop: jQuery("#order_review_heading").offset().top},
-				'slow');
-				alert("Venligst vælg afhentningssted, eller en anden forsendelsesmetode.");
-			}
-		}); 
 	
 	});
 

@@ -6,7 +6,7 @@ Plugin URI: http://www.webshipr.com
 Description: Automated shipping for WooCommerce
 Author: webshipr.com
 Author URI: http://www.webshipr.com
-Version: 1.2.3
+Version: 1.2.4
 
 */
 
@@ -52,6 +52,7 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
                 add_action('woocommerce_review_order_after_shipping', array($this,'append_dynamic'));
                 add_action('woocommerce_checkout_order_processed', array($this, 'order_placed'));
                 add_action('woocommerce_checkout_update_order_meta', array($this, 'override_delivery'));
+                add_action('woocommerce_checkout_process', array($this, 'validate_on_process')); 
 
 
                 // Hook ajax methods
@@ -73,6 +74,35 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 
            }
 
+           // Validate if pakkeshop is required
+           public function validate_on_process(){
+                global $woocommerce; 
+                $rate_id = ""; 
+                if(is_array($_REQUEST["shipping_method"])){
+                    $rate_id = $_REQUEST["shipping_method"][0]; 
+                }else{
+                    $rate_id = $_REQUEST["shipping_method"];
+                }
+
+                
+                $api = $this->ws_api($this->options['api_key']);
+                $rates = $api->GetShippingRates(); 
+                $is_dyn_required = false; 
+
+                // Loop through rates, and check if the rate is dyn
+                if(is_array($rates)){
+                    foreach($rates as $rate){
+                        if($rate->dynamic_pickup && (("WS".$rate->id) == $rate_id)){
+                            $is_dyn_required = true; 
+                        }
+                    }  
+                }
+                
+               if($is_dyn_required && strlen($_REQUEST["dynamic_destination"]) == 0){
+                    $woocommerce->add_error("Venligst vælg et afhentningssted, eller vælg en anden fragtrate"); 
+               }
+
+           }
 
            // Set ajax url in checkout
            public function set_ajaxurl(){
@@ -86,14 +116,16 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 
            // Override delivery info
            public function override_delivery($order_id){
-                $prefix = $_POST["dynamic_destination"];
-                update_post_meta( $order_id, '_shipping_first_name', '');
-                update_post_meta( $order_id, '_shipping_last_name', '');
-                update_post_meta( $order_id, '_shipping_address_1', $_POST["dyn_street_".$prefix]);
-                update_post_meta( $order_id, '_shipping_address_2', '');
-                update_post_meta( $order_id, '_shipping_company', $_POST["dyn_name_".$prefix]);
-                update_post_meta( $order_id, '_shipping_city', $_POST["dyn_city_".$prefix]);
-                update_post_meta( $order_id, '_shipping_postcode', $_POST["dyn_postal_code_".$prefix]);
+                if(strlen($_POST["dynamic_destination"])>0){
+                    $prefix = $_POST["dynamic_destination"];
+                    update_post_meta( $order_id, '_shipping_first_name', '');
+                    update_post_meta( $order_id, '_shipping_last_name', '');
+                    update_post_meta( $order_id, '_shipping_address_1', $_POST["dyn_street_".$prefix]);
+                    update_post_meta( $order_id, '_shipping_address_2', '');
+                    update_post_meta( $order_id, '_shipping_company', $_POST["dyn_name_".$prefix]);
+                    update_post_meta( $order_id, '_shipping_city', $_POST["dyn_city_".$prefix]);
+                    update_post_meta( $order_id, '_shipping_postcode', $_POST["dyn_postal_code_".$prefix]);
+                }
            }
 
            // Is rate dynamic, Ajax
@@ -132,9 +164,6 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
            // Order placed
            public function order_placed($order_id){
                 global $wpdb;
-                
-
-
                 if(strlen($_POST["dynamic_destination"])>0){
                     $table_name = $wpdb->prefix . "webshipr";
                     $prefix = $_POST["dynamic_destination"];
@@ -192,18 +221,18 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 
            // Method to handle dynamic pickup places
            public function append_dynamic(){
-		global $woocommerce;
+		      global $woocommerce;
 
-		$address = $woocommerce->session->customer;
+		      $address = $woocommerce->session->customer;
 
-		$street = $address["shipping_address"];
-		$postal = $address["shipping_postcode"];
-		$city = $address["shipping_city"];
-		$country = $address["shipping_country"];
+		      $street = $address["shipping_address"];
+		      $postal = $address["shipping_postcode"];
+		      $city = $address["shipping_city"];
+		      $country = $address["shipping_country"];
                 
                 if(is_array($woocommerce->session->chosen_shipping_methods)){
-			$rate_id = $woocommerce->session->chosen_shipping_methods[0]; 
-		}elseif(is_array($_POST["shipping_method"])){
+			      $rate_id = $woocommerce->session->chosen_shipping_methods[0]; 
+		        }elseif(is_array($_POST["shipping_method"])){
                         $rate_id = $_POST["shipping_method"][0];
                 }elseif(is_string($_POST["shipping_method"])){
                         $rate_id = $_POST["shipping_method"];
@@ -536,7 +565,8 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
                 $total_weight = 0;
 
                 foreach($items as $item){
-                    $ws_items[] = new ShipmentItem($item["name"], $item["name"], $item["product_id"], $item["qty"], "pcs", 0);
+                    $product = new WC_Product($item["product_id"]);
+                    $ws_items[] = new ShipmentItem($product->get_sku(), $item["name"], $item["product_id"], $item["qty"], "pcs", 0);
                     $total_weight += (double)get_product($item["product_id"])->get_weight()*(double)$item["qty"]*1000;
                 }
 

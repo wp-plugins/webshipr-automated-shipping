@@ -98,6 +98,6 @@ if(count($shops->servicePoints)>0){
 
 </tr>
 <?php }else{ ?>
-    <tr><td colspan="2">Ingen afhentningssteder fundet for den indtastede adresse.</td></tr>
+    <tr><td colspan="2">Ingen afhentningssteder fundet for den indtastede adresse. <br><input type="button" value="Tjek igen" onclick="update_shipping_methods()"></td></tr>
 <?php } ?>
 

@@ -2,7 +2,7 @@
 Contributors: Webshipr 
 link: http://www.webshipr.dk
 Tags: shipping, valgfrit afhentningssted, automated shipping, post danmark, postdk, bluewater,blue water,woocommerce, automatic shipping, dropshipping, webshipr, webshipper 
-Stable tag: 1.2.3
+Stable tag: 1.2.4
 Requires at least: 3.7
 Tested up to: 3.9.1
 
@@ -49,4 +49,5 @@ It's free to try for 30 days. Sign up on http://www.webshipr.com.
 * 1.2.1: Shipping delivery address replaced with pickup place for GLS Pakkeshop and Postdanmark valgfriafhentning.
 * 1.2.2: Javascript in frontend has been updated
 * 1.2.3: Confirmation mail contains now chosen address for pakkeshop.
+* 1.2.4: Button applied in checkout to rescan for pickup destinations. Also a bugfix for update of metadata in checkout applied.
 -------------------------

@@ -94,5 +94,5 @@
 </tr>
 
         <?php }else{ ?>
-            <tr><td colspan="2">Ingen pakkeshops fundet for den indtastede adresse.</td></tr>
+            	<tr><td colspan="2">Ingen pakkeshops fundet for den indtastede adresse. <br> <input type="button" value="Tjek igen" onclick="update_shipping_methods()"></td></tr>
         <?php } ?>
