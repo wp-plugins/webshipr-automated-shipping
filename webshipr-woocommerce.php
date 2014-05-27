@@ -6,7 +6,7 @@ Plugin URI: http://www.webshipr.com
 Description: Automated shipping for WooCommerce
 Author: webshipr.com
 Author URI: http://www.webshipr.com
-Version: 1.2.6
+Version: 1.2.7
 
 */
 
@@ -51,17 +51,17 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
                 // Hook actions
                 add_action('woocommerce_admin_order_data_after_order_details', array($this,'show_on_order'));
 
-                if ( version_compare( $woocommerce->version, '2.1', '<' ) ) {
-                    add_action('woocommerce_review_order_after_order_total', array($this,'append_dynamic'));
-                }else{
-                    add_action('woocommerce_review_order_before_payment', array($this,'append_dynamic'));
-                }
+                //if ( version_compare( $woocommerce->version, '2.1', '<' ) ) {
+                 //   add_action('woocommerce_review_order_after_order_total', array($this,'append_dynamic'));
+                //}else{
+                //    add_action('woocommerce_review_order_before_payment', array($this,'append_dynamic'));
+                //}
 
                 add_action('admin_init', array($this, 'admin_init'));
                 add_action('admin_menu', array($this, 'add_page'));
 
 
-                //add_action('woocommerce_review_order_after_shipping', array($this,'append_dynamic'));
+                add_action('woocommerce_review_order_after_shipping', array($this,'append_dynamic'));
                 add_action('woocommerce_checkout_order_processed', array($this, 'order_placed'));
                 add_action('woocommerce_checkout_update_order_meta', array($this, 'override_delivery'));
                 add_action('woocommerce_checkout_process', array($this, 'validate_on_process')); 

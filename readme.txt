@@ -51,5 +51,5 @@ It's free to try for 30 days. Sign up on http://www.webshipr.com.
 * 1.2.3: Confirmation mail contains now chosen address for pakkeshop.
 * 1.2.4: Button applied in checkout to rescan for pickup destinations. Also a bugfix for update of metadata in checkout applied.
 * 1.2.5: Checkout changed to allow customers to override pickup place address.
-* 1.2.6: Choose in backend, if you want additional search field above pickup shops
+* 1.2.7: Choose in backend, if you want additional search field above pickup shops
 -------------------------

@@ -21,20 +21,18 @@
 			return ($return == "" ? "Lukket" : $return);
 		}
 ?>  
-<table class="shop_table">
-	<thead>
+
         <tr>
             <th colspan="2"> Vælg nærmeste GLS Pakkeshop </th>
         </tr>
-    </thead>
-    <tbody>
+
     	<?php if($show_address_bar){ ?>
 	        <tr>
 				<td colspan="2">
 					<?php if($show_search_address){ ?>
-						<input name="ws_search_street" placeholder="Vejnavn og nummer" class="input-text" value="<?php echo $street?>">
+						<input name="ws_search_street" id="ws_search_street" placeholder="Vejnavn og nummer" class="input-text" value="<?php echo $street?>">
 					<?php }?>
-					<input name="ws_search_zip" placeholder ="Postnr." size="3" class="input-text" value="<?php echo $postal?>">
+					<input name="ws_search_zip" id="ws_search_zip" placeholder ="Postnr." size="3" class="input-text" value="<?php echo $postal?>">
 					<input type="button" class="wc-forward btn alt" value="Find shops"  onClick="update_shipping_methods();">
 				</td>
 			</tr>
@@ -117,8 +115,7 @@
         <?php }else{ ?>
             	<tr><td colspan="2">Ingen pakkeshops fundet for den indtastede adresse. <br> <input type="button" value="Tjek igen" onClick="update_shipping_methods()"></td></tr>
         <?php } ?>
-   </tbody>
-</table>
+
 
 <script>
 		jQuery("#ws_search_street").live("keypress", function(e) {

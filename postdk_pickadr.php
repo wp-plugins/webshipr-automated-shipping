@@ -28,18 +28,17 @@
 		return ($return == "" ? "Lukket" : $return);
 	}
 ?>
-<table class="shop_table">
-	<thead>
+
+
 		<tr>
 				<th colspan="2"> Vælg nærmeste afhentningssted </th>
 		</tr>
-	</thead>
-	<tbody>
+
 	<?php if($show_address_bar){ ?>
 		<tr>
 			<td colspan="2">
 				<?php if($show_search_address){ ?>
-					<input name="ws_search_street" placeholder="Vejnavn og nummer" class="input-text" value="<?php echo $street?>">
+					<input name="ws_search_street" placeholder="Vejnavn og nummer" id="ws_search_street" class="input-text" value="<?php echo $street?>">
 				<?php }?>
 				<input name="ws_search_zip" id="ws_search_zip" placeholder ="Postnr." style="max-width: 60px;" size="3" class="input-text" value="<?php echo $postal?>">
 				<input type="button" class="wc-forward btn alt" value="Find shops"  onClick="update_shipping_methods();">
@@ -125,8 +124,7 @@
 	<?php }else{ ?>
 	    <tr><td colspan="2">Ingen afhentningssteder fundet for den indtastede adresse.</td></tr>
 	<?php } ?>
-	</tbody>
-</table>
+
 <script>
 		jQuery("#ws_search_street").live("keypress", function(e) {
 			if (e.keyCode == 13) {
