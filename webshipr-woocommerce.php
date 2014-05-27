@@ -6,7 +6,7 @@ Plugin URI: http://www.webshipr.com
 Description: Automated shipping for WooCommerce
 Author: webshipr.com
 Author URI: http://www.webshipr.com
-Version: 1.2.5
+Version: 1.2.6
 
 */
 
@@ -30,7 +30,9 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
            protected $option_name = 'webshipr_options';
            protected $data = array(
              'api_key' => '',
-             'auto_process' => false
+             'auto_process' => false, 
+             'show_search_address' => true, 
+             'show_address_bar' => true
            );
         
            private $options;  
@@ -57,6 +59,8 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 
                 add_action('admin_init', array($this, 'admin_init'));
                 add_action('admin_menu', array($this, 'add_page'));
+
+
                 //add_action('woocommerce_review_order_after_shipping', array($this,'append_dynamic'));
                 add_action('woocommerce_checkout_order_processed', array($this, 'order_placed'));
                 add_action('woocommerce_checkout_update_order_meta', array($this, 'override_delivery'));
@@ -72,8 +76,6 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 
                 // Autoprocess hook
                 add_action('woocommerce_thankyou', array($this, 'auto_process_order'));
-
-
                 register_activation_hook(__FILE__, array($this,'activate'));
 
 
@@ -245,6 +247,9 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
     		      $country = $address["shipping_country"];
               }
 
+                $show_address_bar = ((int)$this->options['show_address_bar'] == 1);
+                $show_search_address = ((int)$this->options['show_search_address'] == 1);
+
                 if(is_array($woocommerce->session->chosen_shipping_methods)){
     		      $rate_id = $woocommerce->session->chosen_shipping_methods[0]; 
     	        }elseif(is_array($_POST["shipping_method"])){
@@ -318,6 +323,16 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
                                     <i>This setting is typically used if you have a warehouse integration. It means that it will automatically send the order to webshipr, when its created.</i>
                                 </td>
                             </tr>
+                            <tr valign="top"><th scope="row">Show search field above pakkeshops</th>
+                                <td>
+                                    <input type="checkbox" name ="<?php echo $this->option_name?>[show_address_bar]" <?php echo (int)$options['show_address_bar'] == 1 ? "checked" : "" ?>
+                                </td>
+                            </tr>
+                           <tr valign="top"><th scope="row">Show address in search for pakkeshops</th>
+                                <td>
+                                    <input type="checkbox" name ="<?php echo $this->option_name?>[show_search_address]" <?php echo (int)$options['show_search_address'] == 1 ? "checked" : "" ?>
+                                </td>
+                            </tr>
                         </table>
                         <p class="submit">
                             <input type="submit" class="button-primary" value="<?php _e('Save Changes') ?>" />
@@ -333,6 +348,9 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
                 $valid = array();
                 $valid['api_key'] = sanitize_text_field($input['api_key']);
                 $valid['auto_process'] = ($input['auto_process'] == 'on' ? true : false);
+                $valid['show_search_address'] = ($input['show_search_address'] == 'on' ? true : false);
+                $valid['show_address_bar'] = ($input['show_address_bar'] == 'on' ? true : false);
+
                 $api = $this->ws_api($valid['api_key']);
                 $check = $api->CheckConnection();
 

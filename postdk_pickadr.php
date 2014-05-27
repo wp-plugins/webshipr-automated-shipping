@@ -35,16 +35,19 @@
 		</tr>
 	</thead>
 	<tbody>
+	<?php if($show_address_bar){ ?>
 		<tr>
 			<td colspan="2">
-				<input name="ws_search_street" id="ws_search_street" style="max-width: 240px;" placeholder="Vejnavn og nummer" class="input-text" value="<?php echo $street?>">
+				<?php if($show_search_address){ ?>
+					<input name="ws_search_street" placeholder="Vejnavn og nummer" class="input-text" value="<?php echo $street?>">
+				<?php }?>
 				<input name="ws_search_zip" id="ws_search_zip" placeholder ="Postnr." style="max-width: 60px;" size="3" class="input-text" value="<?php echo $postal?>">
 				<input type="button" class="wc-forward btn alt" value="Find shops"  onClick="update_shipping_methods();">
 				
 			</td>
 		</tr>
 		<?php 
-
+	}
 		if(count($shops->servicePoints)>0){
 
 		?>

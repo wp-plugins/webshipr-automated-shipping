@@ -28,14 +28,18 @@
         </tr>
     </thead>
     <tbody>
-        <tr>
-			<td colspan="2">
-				<input name="ws_search_street" placeholder="Vejnavn og nummer" class="input-text" value="<?php echo $street?>">
-				<input name="ws_search_zip" placeholder ="Postnr." size="3" class="input-text" value="<?php echo $postal?>">
-				<input type="button" class="wc-forward btn alt" value="Find shops"  onClick="update_shipping_methods();">
-			</td>
-		</tr>
-        <?php 
+    	<?php if($show_address_bar){ ?>
+	        <tr>
+				<td colspan="2">
+					<?php if($show_search_address){ ?>
+						<input name="ws_search_street" placeholder="Vejnavn og nummer" class="input-text" value="<?php echo $street?>">
+					<?php }?>
+					<input name="ws_search_zip" placeholder ="Postnr." size="3" class="input-text" value="<?php echo $postal?>">
+					<input type="button" class="wc-forward btn alt" value="Find shops"  onClick="update_shipping_methods();">
+				</td>
+			</tr>
+		<?php 
+		}
         if($shops){
         ?>   
         <tr>
