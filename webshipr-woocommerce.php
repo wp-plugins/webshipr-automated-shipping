@@ -6,7 +6,7 @@ Plugin URI: http://www.webshipr.com
 Description: Automated shipping for WooCommerce
 Author: webshipr.com
 Author URI: http://www.webshipr.com
-Version: 1.2.7
+Version: 1.2.8
 
 */
 
@@ -610,8 +610,8 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
                 $bill_adr->Address1 = $woo_order->billing_address_1;
                 $bill_adr->Address2 = $woo_order->billing_address_2;
                 $bill_adr->City = $woo_order->billing_city;
-                $bill_adr->ContactName = $woo_order->billing_first_name . " " . $woo_order->billing_last_name;
-                $bill_adr->ContactName2 = $woo_order->billing_company;
+                $bill_adr->ContactName = $woo_order->billing_company;
+                $bill_adr->ContactName2 = $woo_order->billing_first_name . " " . $woo_order->billing_last_name;
                 $bill_adr->CountryCode = $woo_order->billing_country;
                 $bill_adr->EMail = $woo_order->billing_email;
                 $bill_adr->Phone = $woo_order->billing_phone;
@@ -623,8 +623,8 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
                 $deliv_adr->Address1 = $woo_order->shipping_address_1;
                 $deliv_adr->Address2 = $woo_order->shipping_address_2;
                 $deliv_adr->City = $woo_order->shipping_city;
-                $deliv_adr->ContactName = $woo_order->shipping_first_name . " " . $woo_order->shipping_last_name;
-                $deliv_adr->ContactName2 = $woo_order->shipping_company;
+                $deliv_adr->ContactName = $woo_order->shipping_company;
+                $deliv_adr->ContactName2 = $woo_order->shipping_first_name . " " . $woo_order->shipping_last_name;
                 $deliv_adr->CountryCode = $woo_order->shipping_country;
                 $deliv_adr->EMail = $woo_order->billing_email;
                 $deliv_adr->Phone = $woo_order->billing_phone;
@@ -653,12 +653,12 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
                     $deliv_adr->Phone = '';
 
                     // define dyn adr
-                    $dynamic_adr = new ShipmentAddress();
-                    $dynamic_adr->Address1 = $dynamic_order->address;
-                    $dynamic_adr->City = $dynamic_order->city;
-                    $dynamic_adr->ContactName = $dynamic_order->name;
-                    $dynamic_adr->ZIP = $dynamic_order->postal_code;
-                    $dynamic_adr->CountryCode = $dynamic_order->country_code;
+                    $dynamic_adr                = new ShipmentAddress();
+                    $dynamic_adr->Address1      = $dynamic_order->address;
+                    $dynamic_adr->City          = $dynamic_order->city;
+                    $dynamic_adr->ContactName   = $dynamic_order->name;
+                    $dynamic_adr->ZIP           = $dynamic_order->postal_code;
+                    $dynamic_adr->CountryCode   = $dynamic_order->country_code;
                     
                     $shipment->custom_pickup_identifier = $dynamic_order->dynamic_pickup_identifier;
                     $shipment->DynamicAddress = $dynamic_adr;
