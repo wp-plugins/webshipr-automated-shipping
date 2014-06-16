@@ -6,7 +6,7 @@ Plugin URI: http://www.webshipr.com
 Description: Automated shipping for WooCommerce
 Author: webshipr.com
 Author URI: http://www.webshipr.com
-Version: 1.2.8
+Version: 1.2.9
 
 */
 
@@ -338,6 +338,7 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
                             <input type="submit" class="button-primary" value="<?php _e('Save Changes') ?>" />
                         </p>
                     </form>
+
                 </div>
                 <?php
             }
@@ -600,7 +601,13 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
                 foreach($items as $item){
                     $product = new WC_Product($item["product_id"]);
                     $ws_items[] = new ShipmentItem($product->get_sku(), $item["name"], $item["product_id"], $item["qty"], "pcs", 0);
-                    $total_weight += (double)get_product($item["product_id"])->get_weight()*(double)$item["qty"]*1000;
+                    $weight_uom = get_option('woocommerce_weight_unit');
+
+                    if($weight_uom == 'kg'){
+                        $total_weight += (double)get_product($item["product_id"])->get_weight()*(double)$item["qty"]*1000;
+                    }else{
+                        $total_weight += (double)get_product($item["product_id"])->get_weight()*(double)$item["qty"];
+                    }
                 }
 
 
@@ -727,7 +734,7 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
     // Shipping
      
     function shipping_method_init() {
-        if ( ! class_exists( 'WC_Your_Shipping_Method' ) ) {
+        if ( ! class_exists( 'WebshiprRates' ) ) {
             class WebshiprRates extends WC_Shipping_Method {
                 private $options;
 
@@ -765,7 +772,16 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
                     $api = $this->ws_api($this->options['api_key']);
                     $rates = $api->GetShippingRates($total);
                     $destination  = $package["destination"]["country"];
-                    $cart_weight = $woocommerce->cart->cart_contents_weight * 1000;
+                    
+                    $weight_uom = get_option('woocommerce_weight_unit');
+
+                    // Webshipr wants UOM in grams
+                    if ($weight_uom == 'kg'){
+                        $cart_weight = $woocommerce->cart->cart_contents_weight * 1000;
+                    }else{
+                        $cart_weight = $woocommerce->cart->cart_contents_weight;
+                    }
+
 
                     // If any rates were found
                     if($rates){
