@@ -14,6 +14,7 @@ class ParcelShopDK{
 
    // Get a shop near the address
    public function getShopNear($street, $zip, $amount){
+       try{
         $result = false;
         $attempts = 0;
         $query_street = explode(' ', preg_replace('/[^A-Za-z0-9\-\ ]/', '', $street));
@@ -36,21 +37,28 @@ class ParcelShopDK{
         }else{
           return $this->queryZip($zip);
         }
+       }catch(Exception $e){
+          return array(); 
+       }
    }
 
    // Just query ZIP
    private function queryZip($zipcode){
-      $shops = $this->soapclient->GetParcelShopsInZipcode(array('zipcode' => $zipcode));
-      if(isset($shops->GetParcelShopsInZipcodeResult->PakkeshopData))
-      {
-        if(!is_array($shops->GetParcelShopsInZipcodeResult->PakkeshopData)){ 
-          return array($shops->GetParcelShopsInZipcodeResult->PakkeshopData);
-        }else{
-          return $shops->GetParcelShopsInZipcodeResult->PakkeshopData;
+      try{
+        $shops = $this->soapclient->GetParcelShopsInZipcode(array('zipcode' => $zipcode));
+        if(isset($shops->GetParcelShopsInZipcodeResult->PakkeshopData))
+        {
+          if(!is_array($shops->GetParcelShopsInZipcodeResult->PakkeshopData)){ 
+            return array($shops->GetParcelShopsInZipcodeResult->PakkeshopData);
+          }else{
+            return $shops->GetParcelShopsInZipcodeResult->PakkeshopData;
+          }
+        
         }
-      
+        return array(); 
+      }catch(Exception $e){
+        return array(); 
       }
-      return array(); 
    }
 
    // Try and query
