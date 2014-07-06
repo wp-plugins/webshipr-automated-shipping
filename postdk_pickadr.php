@@ -77,7 +77,7 @@
 							<div class="service_point" id="servicepoint_<?php echo $shop->servicePointId; ?>" onchange="set_selection()" <?php echo ($shop != $shops->servicePoints[0] ? "style=\"display: none;\"" : "")?>>
 							
 								<h3>Åbningstider for <?php echo $shop->name ?></h3>
-								<table>
+								<table class="webshipr_opening_hours">
 									<tr>
 										<th>Mandag</th><td><?php echo write_day('MO', $shop);?></td>
 									</tr>
