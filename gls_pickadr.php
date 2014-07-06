@@ -23,17 +23,17 @@
 ?>  
 
         <tr>
-            <th colspan="2"> Vælg nærmeste GLS Pakkeshop </th>
+            <th colspan="2" class="webshipr_pup_header"> Vælg nærmeste GLS Pakkeshop </th>
         </tr>
 
     	<?php if($show_address_bar){ ?>
 	        <tr>
-				<td colspan="2">
+				<td colspan="2" class="webshipr_pup_search">
 					<?php if($show_search_address){ ?>
 						<input name="ws_search_street" id="ws_search_street" placeholder="Vejnavn og nummer" class="input-text" value="<?php echo $street?>">
 					<?php }?>
 					<input name="ws_search_zip" id="ws_search_zip" placeholder ="Postnr." size="3" class="input-text" value="<?php echo $postal?>">
-					<input type="button" class="wc-forward btn alt" value="Find shops"  onClick="update_shipping_methods();">
+					<input type="button" class="wc-forward btn alt webshipr_search_btn" value="Find shops"  onClick="update_shipping_methods();">
 				</td>
 			</tr>
 		<?php 
@@ -41,7 +41,7 @@
         if($shops){
         ?>   
         <tr>
-			<td colspan="2" > 
+			<td colspan="2" class="webshipr_pup_selection"> 
 				<select name="dynamic_destination" id="dynamic_destination_select" onchange="set_selection()" onload="set_selection()" style="width: auto;">
 					<?php foreach($shops as $shop){ ?>
 						<option value="<?php echo trim($shop->Number)?>">
@@ -53,7 +53,7 @@
 			</td>
 		</tr>
 		<tr>
-			<td colspan="2">
+			<td colspan="2" class="webshipr_pup_content">
 			<div id="pickup_info">
 
 			</div>
@@ -113,7 +113,7 @@
 </tr>
 
         <?php }else{ ?>
-            	<tr><td colspan="2">Ingen pakkeshops fundet for den indtastede adresse. <br> <input type="button" value="Tjek igen" onClick="update_shipping_methods()"></td></tr>
+            	<tr><td colspan="2">Ingen pakkeshops fundet for den indtastede adresse.</td></tr>
         <?php } ?>
 
 

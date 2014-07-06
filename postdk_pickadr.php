@@ -31,17 +31,17 @@
 
 
 		<tr>
-				<th colspan="2"> Vælg nærmeste afhentningssted </th>
+				<th colspan="2" class="webshipr_pup_header"> Vælg nærmeste afhentningssted </th>
 		</tr>
 
 	<?php if($show_address_bar){ ?>
 		<tr>
-			<td colspan="2">
+			<td colspan="2" class="webshipr_pup_search">
 				<?php if($show_search_address){ ?>
 					<input name="ws_search_street" placeholder="Vejnavn og nummer" id="ws_search_street" class="input-text" value="<?php echo $street?>">
 				<?php }?>
 				<input name="ws_search_zip" id="ws_search_zip" placeholder ="Postnr." style="max-width: 60px;" size="3" class="input-text" value="<?php echo $postal?>">
-				<input type="button" class="wc-forward btn alt" value="Find shops"  onClick="update_shipping_methods();">
+				<input type="button" class="wc-forward btn alt webshipr_search_btn" value="Find shops"  onClick="update_shipping_methods();">
 				
 			</td>
 		</tr>
@@ -52,7 +52,7 @@
 		?>
 
 		<tr>
-				<td colspan="2" > 
+				<td colspan="2"  class="webshipr_pup_selection"> 
 					<select name="dynamic_destination" id="dynamic_destination_select" style="width: auto;">
 						<?php foreach($shops->servicePoints as $shop){ ?>
 							<option value="<?php echo $shop->servicePointId?>">
@@ -64,7 +64,7 @@
 					</td>
 		</tr>
 		<tr>
-			<td colspan="2">
+			<td colspan="2"  class="webshipr_pup_content">
 					<div id="pickup_info">
 
 					</div>
