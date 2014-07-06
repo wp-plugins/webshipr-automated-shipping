@@ -2,7 +2,7 @@
 Contributors: Webshipr 
 link: http://www.webshipr.dk
 Tags: shipping, valgfrit afhentningssted, automated shipping, post danmark, postdk, bluewater,blue water,woocommerce, automatic shipping, dropshipping, webshipr, webshipper 
-Stable tag: 1.3.0
+Stable tag: 1.3.1
 Requires at least: 3.7
 Tested up to: 3.9.1
 
@@ -53,4 +53,5 @@ It's free to try for 30 days. Sign up on http://www.webshipr.com.
 * 1.2.5: Checkout changed to allow customers to override pickup place address.
 * 1.2.7: Choose in backend, if you want additional search field above pickup shops
 * 1.2.9: Supports for different UOM in weight ( kg / g )
+* 1.3.1: Free above is now inclusive VAT. Please take into account in your webshipr settings. 
 -------------------------
