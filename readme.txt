@@ -54,4 +54,5 @@ It's free to try for 30 days. Sign up on http://www.webshipr.com.
 * 1.2.7: Choose in backend, if you want additional search field above pickup shops
 * 1.2.9: Supports for different UOM in weight ( kg / g )
 * 1.3.1: Free above is now inclusive VAT. Please take into account in your webshipr settings. 
+* 1.3.2: Classes applied to GUI to make it easier to customize
 -------------------------
