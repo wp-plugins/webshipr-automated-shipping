@@ -6,7 +6,7 @@ Plugin URI: http://www.webshipr.com
 Description: Automated shipping for WooCommerce
 Author: webshipr.com
 Author URI: http://www.webshipr.com
-Version: 1.3.2
+Version: 1.3.3
 
 */
 
@@ -767,13 +767,21 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
                 // Calculate shipping rates
                 public function calculate_shipping( $package ) {
                     global $woocommerce;
-		    $total = 0; 
-	            // Calculate cart total incl. taxes
-		    if(count($package["contents"] > 0)){
-			foreach($package["contents"] as $content){
-		    		$total += $content["line_total"] + $content["line_tax"];
-			}
-		    }
+		           $total = 0; 
+	               // Calculate cart total incl. taxes
+        		    if(count($package["contents"] > 0)){
+            			foreach($package["contents"] as $content){
+            		    		$total += $content["line_total"] + $content["line_tax"];
+            			}
+		            }
+
+                   // Check if any coupon codes are applied
+                    if(count($package['applied_coupons']) > 0){
+                        foreach($package['applied_coupons'] as $coupon){
+                                $obj = new WC_Coupon($coupon);
+                                $total = $total - $obj->amount;
+                        }
+                    }
                     $api = $this->ws_api($this->options['api_key']);
                     $rates = $api->GetShippingRates($total);
                     $destination  = $package["destination"]["country"];
