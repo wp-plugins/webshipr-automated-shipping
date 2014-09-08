@@ -9,6 +9,34 @@ class WebshiprAPI{
 		$this->api_token = $api_token;
 		$this->base_host = $base_host;
 	}
+
+
+	/* Version 2 of PUP API */
+
+
+	function getShopsByCarrierAndZip($zip, $carrier){
+		return $this->post_datav2('PUP/pupShopsByZip', array("carrier" => $carrier, "zip" => $zip));
+	}
+
+	function getShopsByRateAndZip($zip, $rate_id){
+		return $this->post_datav2('PUP/pupShopsByZip', array("rate_id" => $rate_id, "zip" => $zip));
+	}
+
+	function getShopsByRateAndAddress($address, $zip, $country, $rate_id){
+		return $this->post_datav2("PUP/pupShopsByAddress",  array("rate_id" => $rate_id, 
+															      "address" => $address, 
+															      "zip" 	=> $zip, 
+															      "country" => $country));	
+	}
+
+	function getShopsByCarrierAndAddress($address, $zip, $country, $carrier){
+		return $this->post_datav2("PUP/pupShopsByAddress",  array("carrier" => $carrier, 
+								      "address" => $address, 
+								      "zip" 	=> $zip, 
+								      "country" => $country));	
+	}
+
+	/* End V2 PUP API */
 	
 	function OrderExists($order_no){
 		$result = $this->post_data("order_exists", array("ExtRef" => $order_no));
@@ -20,19 +48,30 @@ class WebshiprAPI{
 		}		
 	}
 
+
 	function GetPostDKShops($country, $street, $number, $postal){
 		$data = array("postal_code" => $postal, "country" => $country , "street" => $street, "number" => $number);
 		return $this->post_data("post_dk_shops", $data)->servicePointInformationResponse;
 	}
 
+
+	private function post_datav2($path, $data){
+                $ch = curl_init($this->base_host.'/APIV2/'.$path); #$this->base_host."/APIV2/".$resource);
+                curl_setopt($ch, CURLOPT_POST, true);
+                curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json',
+                'Authorization: Token token="'.$this->api_token.'"'));
+                curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                return json_decode(curl_exec($ch));
+	}
 	private function post_data($resource, $data){
 		$ch = curl_init($this->base_host."/API/".$resource);
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json',
-        'Authorization: Token token="'.$this->api_token.'"'));
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        return json_decode(curl_exec($ch));
+	        curl_setopt($ch, CURLOPT_POST, true);
+    	    	curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json',
+     	   	'Authorization: Token token="'.$this->api_token.'"'));
+     	   	curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+      		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+      	  	return json_decode(curl_exec($ch));
 	}
 
 	function GetOrder($order_no){
@@ -40,7 +79,7 @@ class WebshiprAPI{
 	}
 
 	function SetAndProcessOrder($order_no, $rate_id){
-        return $this->post_data("set_rate", array("ExtRef" => $order_no, "new_rate" => $rate_id)); 
+        	return $this->post_data("set_rate", array("ExtRef" => $order_no, "new_rate" => $rate_id)); 
 	}
 
 	function CreateShipment($shipment){
@@ -101,6 +140,13 @@ class WebshiprAPI{
               return false;
     	    }
     }
+
+    public static function generateAjaxToken($length = 10) {
+    	
+    	$token = substr(str_shuffle("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"), 0, $length);
+    	$_SESSION['WS_AJAX_TOKEN'] = $token;
+    	return $token;
+	}
 
 }
 

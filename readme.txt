@@ -1,10 +1,10 @@
 === Webshipr - automated shipping ===
 Contributors: Webshipr 
 link: http://www.webshipr.dk
-Tags: shipping, valgfrit afhentningssted, automated shipping, post danmark, postdk, bluewater,blue water,woocommerce, automatic shipping, dropshipping, webshipr, webshipper 
-Stable tag: 1.3.3
+Tags: shipping, valgfrit afhentningssted, automated shipping, post danmark, postdk, bluewater,blue water,woocommerce, automatic shipping, dropshipping, webshipr, webshipper, GLS 
+Stable tag: 2.0
 Requires at least: 3.7
-Tested up to: 3.9.1
+Tested up to: 4.0.0
 
 Automated shipping for woo-commerce.
 
@@ -55,5 +55,5 @@ It's free to try for 30 days. Sign up on http://www.webshipr.com.
 * 1.2.9: Supports for different UOM in weight ( kg / g )
 * 1.3.1: Free above is now inclusive VAT. Please take into account in your webshipr settings. 
 * 1.3.2: Classes applied to GUI to make it easier to customize
-* 1.3.3: Coupon codes are subtracted in shipping calculations
+* 2.0.0: New plugin - PUPs are picked in lightbox with map. Entirely new design.
 -------------------------

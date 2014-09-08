@@ -6,7 +6,7 @@ Plugin URI: http://www.webshipr.com
 Description: Automated shipping for WooCommerce
 Author: webshipr.com
 Author URI: http://www.webshipr.com
-Version: 1.3.3
+Version: 2.0
 
 */
 
@@ -20,7 +20,7 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
     define("API_RESOURCE", 'https://portal.webshipr.com');
 
     # Load webshipr library
-    require('webshipr.php');
+    require_once('webshipr.php');
 
     # Dont clash
     if ( ! class_exists( 'WebshiprWC' ) ) {
@@ -42,19 +42,30 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
            public function __construct() {
                 global $woocommerce;
 
-                // Add JS and CSS
-                wp_register_script("ws_js", plugins_url("webshipr.js", __FILE__));
-                wp_enqueue_script('jquery');
+                // Register JS
+                wp_enqueue_script("jquery"); 
+                wp_register_script("ws_maps", "https://maps.googleapis.com/maps/api/js?sensor=false"); 
+                wp_register_script("ws_maplabel", plugins_url("js/maplabel.js", __FILE__));
+                wp_register_script("ws_pup", plugins_url("js/wspup.js", __FILE__));
+                wp_register_script("ws_js", plugins_url("js/webshipr.js", __FILE__));
+                
+                wp_enqueue_script('ws_maps');
+                wp_enqueue_script('ws_maplabel');
+                wp_enqueue_script('ws_pup');
                 wp_enqueue_script('ws_js');
+
+                // Register CSS
+                wp_register_style("ws_css", plugins_url("css/wspup.css", __FILE__));
+                wp_enqueue_style('ws_css');
                 
 
                 // Hook actions
                 add_action('woocommerce_admin_order_data_after_order_details', array($this,'show_on_order'));
 
                 //if ( version_compare( $woocommerce->version, '2.1', '<' ) ) {
-                    add_action('woocommerce_review_order_after_order_total', array($this,'append_dynamic'));
+                //    add_action('woocommerce_review_order_after_order_total', array($this,'append_dynamic'));
                 //}else{
-                //    add_action('woocommerce_review_order_before_payment', array($this,'append_dynamic'));
+                    add_action('woocommerce_review_order_before_payment', array($this,'append_dynamic'));
                 //}
 
                 add_action('admin_init', array($this, 'admin_init'));
@@ -73,6 +84,10 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
                 wp_localize_script( 'check_rates', 'wsAjax', array( 'ajaxurl' => admin_url( 'admin-ajax.php' ))); 
                 add_action('woocommerce_after_checkout_shipping_form', array($this, 'set_ajaxurl')); 
 
+                add_action("wp_ajax_nopriv_get_shops", array($this, "ajax_get_shops"));
+                add_action( 'wp_ajax_get_shops', array($this, 'ajax_get_shops') );
+                wp_localize_script( 'get_shops', 'wsAjax', array( 'ajaxurl' => admin_url( 'admin-ajax.php' ))); 
+
 
                 // Autoprocess hook
                 add_action('woocommerce_thankyou', array($this, 'auto_process_order'));
@@ -82,6 +97,28 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
                 // Initialize settings
                 $this->options = get_settings('webshipr_options');
 
+           }
+
+           // Get shops AJAX
+           public function ajax_get_shops(){
+                // Webshipr API Instance
+                $api = $this->ws_api($this->options['api_key']); 
+
+                // Check the method
+                switch($_POST["method"]){
+                    case 'getByZipCarrier':
+                        wp_send_json_success($api->getShopsByCarrierAndZip($_POST["zip"], $_POST['carrier']));
+                        break;
+                    case 'getByZipRate':
+                        wp_send_json_success($api->getShopsByRateAndZip($_POST["zip"], $_POST['rate_id']));
+                        break;
+                    case 'getByAddressRate':
+                        wp_send_json_success($api->getShopsByRateAndAddress($_POST['address'], $_POST['zip'], 'DK', $_POST['rate_id']));
+                        break;
+                    default: 
+                        wp_send_json_success(array("error" => 'Method not defined'));
+                        break;
+                }
            }
 
            // Validate if pakkeshop is required
@@ -108,7 +145,7 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
                     }  
                 }
                 
-               if($is_dyn_required && strlen($_REQUEST["dynamic_destination"]) == 0){
+               if($is_dyn_required && strlen($_REQUEST["wspup_id"]) == 0){
                     $woocommerce->add_error("Venligst vælg et afhentningssted, eller vælg en anden fragtrate"); 
                }
 
@@ -119,22 +156,22 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 
             ?>
                 <script type="text/javascript">
-                        ws_ajax_url = '<?php echo admin_url('admin-ajax.php'); ?>';
+                        wspup.ajaxUrl   = '<?php echo admin_url('admin-ajax.php'); ?>';
+                        ws_ajax_url     = '<?php echo admin_url('admin-ajax.php'); ?>';
                 </script>
             <?php
            }
 
            // Override delivery info
            public function override_delivery($order_id){
-                if(strlen($_POST["dynamic_destination"])>0){
-                    $prefix = $_POST["dynamic_destination"];
+                if(strlen($_POST["wspup_id"])>0){
                     update_post_meta( $order_id, '_shipping_first_name', '');
                     update_post_meta( $order_id, '_shipping_last_name', '');
-                    update_post_meta( $order_id, '_shipping_address_1', $_POST["dyn_street_".$prefix]);
+                    update_post_meta( $order_id, '_shipping_address_1', $_POST["wspup_address"]);
                     update_post_meta( $order_id, '_shipping_address_2', '');
-                    update_post_meta( $order_id, '_shipping_company', $_POST["dyn_name_".$prefix]);
-                    update_post_meta( $order_id, '_shipping_city', $_POST["dyn_city_".$prefix]);
-                    update_post_meta( $order_id, '_shipping_postcode', $_POST["dyn_postal_code_".$prefix]);
+                    update_post_meta( $order_id, '_shipping_company', $_POST["wspup_name"]);
+                    update_post_meta( $order_id, '_shipping_city', $_POST["wspup_city"]);
+                    update_post_meta( $order_id, '_shipping_postcode', $_POST["wspup_zip"]);
                 }
            }
 
@@ -174,10 +211,8 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
            // Order placed
            public function order_placed($order_id){
                 global $wpdb;
-                if(strlen($_POST["dynamic_destination"])>0){
+                if(strlen($_POST["wspup_id"])>0){
                     $table_name = $wpdb->prefix . "webshipr";
-                    $prefix = $_POST["dynamic_destination"];
-
 
                     if(is_array($_POST["shipping_method"])){
                             $rate_id = $_POST["shipping_method"][0];
@@ -188,13 +223,13 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
                     }
 
                     $wpdb->insert( $table_name, array( 'woo_order_id' => $order_id, 
-                        'dynamic_pickup_identifier' => mysql_escape_string($_POST["dynamic_destination"]),
+                        'dynamic_pickup_identifier' => mysql_escape_string($_POST["wspup_id"]),
                         'shipping_method' => mysql_escape_string($rate_id),
-                        'country_code' => mysql_escape_string($_POST["dyn_country_".$prefix]),
-                        'address' => mysql_escape_string($_POST["dyn_street_".$prefix]),
-                        'city' => mysql_escape_string($_POST["dyn_city_".$prefix]),
-                        'postal_code' => mysql_escape_string($_POST["dyn_postal_code_".$prefix]),
-                        'name' => mysql_escape_string($_POST["dyn_name_".$prefix])
+                        'country_code' => mysql_escape_string($_POST["wspup_country"]),
+                        'address' => mysql_escape_string($_POST["wspup_address"]),
+                        'city' => mysql_escape_string($_POST["wspup_city"]),
+                        'postal_code' => mysql_escape_string($_POST["wspup_zip"]),
+                        'name' => mysql_escape_string($_POST["wspup_name"])
                     ));
 
                 }
@@ -231,50 +266,27 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 
            // Method to handle dynamic pickup places
            public function append_dynamic(){
-		      global $woocommerce;
+                global $woocommerce;
 
-		      parse_str($_POST["post_data"], $parsed);
-              if($parsed["ws_search_street"] || $parsed["ws_search_zip"]){
-                  $street = $parsed["ws_search_street"]; 
-                  $postal = $parsed["ws_search_zip"];
-                  $city = ''; 
-                  $country = 'DK'; 
-              }else{
-                  $address = $woocommerce->session->customer;
-    		      $street = $address["shipping_address"];
-    		      $postal = $address["shipping_postcode"];
-    		      $city = $address["shipping_city"];
-    		      $country = $address["shipping_country"];
-              }
-
-                $show_address_bar = ((int)$this->options['show_address_bar'] == 1);
-                $show_search_address = ((int)$this->options['show_search_address'] == 1);
-
+                // Get selected rate id
                 if(is_array($woocommerce->session->chosen_shipping_methods)){
-    		      $rate_id = $woocommerce->session->chosen_shipping_methods[0]; 
+    		       $rate_id = $woocommerce->session->chosen_shipping_methods[0]; 
     	        }elseif(is_array($_POST["shipping_method"])){
-                        $rate_id = $_POST["shipping_method"][0];
+                   $rate_id = $_POST["shipping_method"][0];
                 }elseif(is_string($_POST["shipping_method"])){
-                        $rate_id = $_POST["shipping_method"];
+                   $rate_id = $_POST["shipping_method"];
                 }else{
-                        $rate_id = "not_known";
+                   $rate_id = "not_known";
                 }
-            
+                
                 // Is it a webshipr rate at all?
                 if(preg_match( "/WS/", $rate_id )){
                     $this_rate = $this->get_rate_details($rate_id);
                     
+                    // If dynamic, load puptpl
                     if($this_rate->dynamic_pickup){
-
-                        switch($this_rate->carrier_code){
-                            case "POSTDK":
-                                require 'postdk_pickadr.php';
-                                break;
-                            case "GLS": 
-                                require 'gls_pickadr.php';
-                                break;
-                        }
-
+                        $rate = str_replace("WS","",$rate_id); 
+                        require_once 'puptpl.php';
                     }
                 
                 }
@@ -321,16 +333,6 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
                                 <td>
                                     <input type="checkbox" name="<?php echo $this->option_name?>[auto_process]" <?php echo (int)$options['auto_process'] == 1 ? "checked" : "" ?> />
                                     <i>This setting is typically used if you have a warehouse integration. It means that it will automatically send the order to webshipr, when its created.</i>
-                                </td>
-                            </tr>
-                            <tr valign="top"><th scope="row">Show search field above pakkeshops</th>
-                                <td>
-                                    <input type="checkbox" name ="<?php echo $this->option_name?>[show_address_bar]" <?php echo (int)$options['show_address_bar'] == 1 ? "checked" : "" ?>
-                                </td>
-                            </tr>
-                           <tr valign="top"><th scope="row">Show address in search for pakkeshops</th>
-                                <td>
-                                    <input type="checkbox" name ="<?php echo $this->option_name?>[show_search_address]" <?php echo (int)$options['show_search_address'] == 1 ? "checked" : "" ?>
                                 </td>
                             </tr>
                         </table>
@@ -381,8 +383,9 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
             }
 
             public function deactivate() {
-                delete_option($this->option_name);
-                $this->drop_table();
+                //delete_option($this->option_name);
+                //$this->drop_table();
+                // Cleanup disabled - annoying for customers.
             }
 
             // Method to display webshipr on orders
@@ -767,21 +770,23 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
                 // Calculate shipping rates
                 public function calculate_shipping( $package ) {
                     global $woocommerce;
-		           $total = 0; 
-	               // Calculate cart total incl. taxes
+		            $total = 0; 
+                        
+    	            // Calculate cart total incl. taxes
         		    if(count($package["contents"] > 0)){
             			foreach($package["contents"] as $content){
             		    		$total += $content["line_total"] + $content["line_tax"];
             			}
-		            }
-
-                   // Check if any coupon codes are applied
+        		    }
+                    
+                    // Check if any coupon codes are applied
                     if(count($package['applied_coupons']) > 0){
                         foreach($package['applied_coupons'] as $coupon){
                                 $obj = new WC_Coupon($coupon);
                                 $total = $total - $obj->amount;
                         }
                     }
+
                     $api = $this->ws_api($this->options['api_key']);
                     $rates = $api->GetShippingRates($total);
                     $destination  = $package["destination"]["country"];
