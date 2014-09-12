@@ -438,6 +438,9 @@ var wspup = {
 	showPup: function(){
 		jQuery("#wspup_wrapper").fadeIn("fast");
 		wspup.listen();
+		if(jQuery("#wspup_zip").val().length>0){
+			wspup.search(); 
+		}
 	}
 }
 
