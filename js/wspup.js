@@ -2,7 +2,7 @@ var wspup = {
 	
 	// Variables 
 	ajaxToken: '', 
-	ajaxUrl: 'ajax.php',
+	ajaxUrl: '/wp-admin/admin-ajax.php',
 	currentRateId: 0,
 	lastShopArray: [],
 	currentDistance: -1, 
