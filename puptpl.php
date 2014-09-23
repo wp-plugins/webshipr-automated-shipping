@@ -65,9 +65,14 @@
 	function wspupTransferAddress(){
 
 		if(jQuery("#wspup_address").val().length === 0 && jQuery("#wspup_zip").val().length === 0){
-			if(jQuery("#shipping_address_1").val().length>0){
-				jQuery("#wspup_address").val(jQuery("#shipping_address_1").val());
-				jQuery("#wspup_zip").val(jQuery("#shipping_postcode").val());
+			if(jQuery("#shipping_address_1").length){
+				if(jQuery("#shipping_address_1").val().length>0){
+					jQuery("#wspup_address").val(jQuery("#shipping_address_1").val());
+					jQuery("#wspup_zip").val(jQuery("#shipping_postcode").val());
+				}else{
+					jQuery("#wspup_address").val(jQuery("#billing_address_1").val());
+					jQuery("#wspup_zip").val(jQuery("#billing_postcode").val());
+				}
 			}else{
 				jQuery("#wspup_address").val(jQuery("#billing_address_1").val());
 				jQuery("#wspup_zip").val(jQuery("#billing_postcode").val());

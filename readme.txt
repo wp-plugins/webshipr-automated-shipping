@@ -2,7 +2,7 @@
 Contributors: Webshipr 
 link: http://www.webshipr.dk
 Tags: shipping, valgfrit afhentningssted, automated shipping, post danmark, postdk, bluewater,blue water,woocommerce, automatic shipping, dropshipping, webshipr, webshipper, GLS, Bring
-Stable tag: 2.0.2
+Stable tag: 2.0.3
 Requires at least: 3.7
 Tested up to: 4.0.0
 
