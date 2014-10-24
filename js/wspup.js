@@ -6,6 +6,10 @@ var wspup = {
 	currentRateId: 0,
 	lastShopArray: [],
 	currentDistance: -1, 
+	// Get translation
+	getTranslation: function(key){
+		return jQuery("input[name=i18n_"+key+"]").val();;
+	},
 
 	// Get shops by carrier 
 	getShopsByCarrier: function(carrier, zip){
@@ -109,7 +113,7 @@ var wspup = {
 			result += '<p>'+item.street+ '</p>';
 			result += '<p>'+item.zip+ ' ' + item.city + '</p>';
 			if(item.opening_hours.length > 0){
-				result += '<p><a href="#" class="wspupSeeOpeningHour">Se åbningstider</a></p>';
+				result += '<p><a href="#" class="wspupSeeOpeningHour">'+wspup.getTranslation('see_opening_hours')+'</a></p>';
 			}
 			result += '<input class="shop_address" value="'+item.street+'" type="hidden">'; 
 			result += '<input class="shop_carrier" value="'+item.carrier+'" type="hidden">';
@@ -122,16 +126,16 @@ var wspup = {
 			result += '<input class="shop_name" value="'+item.name+'" type="hidden">';  
 			result += '<div class="wspupOpeningHours">';
 			result += '<a class="wspupOpnClose" onClick="jQuery(this).parent().hide();" href="#" style="color: black;">Luk [X]</a>'
-			result += '<h5>Åbningstider</h5>';
+			result += '<h5>'+wspup.getTranslation('opening_hours')+'</h5>';
 			result += '<table style="border: 0">';
 
-			result += '<tr><td width="90px;"><b>Mandag:</b></td><td>'	+wspup.formatOpeningHour(item.opening_hours, 'MO')+	'</td></tr>';
-			result += '<tr><td width="90px;"><b>Tirsdag:</b></td><td>'	+wspup.formatOpeningHour(item.opening_hours, 'TU')+	'</td></tr>';
-			result += '<tr><td width="90px;"><b>Onsdag:</b></td><td>'	+wspup.formatOpeningHour(item.opening_hours, 'WE')+	'</td></tr>';
-			result += '<tr><td width="90px;"><b>Torsdag:</b></td><td>'	+wspup.formatOpeningHour(item.opening_hours, 'TH')+	'</td></tr>';
-			result += '<tr><td width="90px;"><b>Fredag:</b></td><td>'	+wspup.formatOpeningHour(item.opening_hours, 'FR')+	'</td></tr>';
-			result += '<tr><td width="90px;"><b>Lørdag:</b></td><td>'	+wspup.formatOpeningHour(item.opening_hours, 'SA')+	'</td></tr>';
-			result += '<tr><td width="90px;"><b>Søndag:</b></td><td>'	+wspup.formatOpeningHour(item.opening_hours, 'SU')+	'</td></tr>';
+			result += '<tr><td width="90px;"><b>'+wspup.getTranslation('monday')+':</b></td><td>'	+wspup.formatOpeningHour(item.opening_hours, 'MO')+	'</td></tr>';
+			result += '<tr><td width="90px;"><b>'+wspup.getTranslation('tuesday')+':</b></td><td>'	+wspup.formatOpeningHour(item.opening_hours, 'TU')+	'</td></tr>';
+			result += '<tr><td width="90px;"><b>'+wspup.getTranslation('wednesday')+':</b></td><td>'+wspup.formatOpeningHour(item.opening_hours, 'WE')+	'</td></tr>';
+			result += '<tr><td width="90px;"><b>'+wspup.getTranslation('thursday')+':</b></td><td>'	+wspup.formatOpeningHour(item.opening_hours, 'TH')+	'</td></tr>';
+			result += '<tr><td width="90px;"><b>'+wspup.getTranslation('friday')+':</b></td><td>'	+wspup.formatOpeningHour(item.opening_hours, 'FR')+	'</td></tr>';
+			result += '<tr><td width="90px;"><b>'+wspup.getTranslation('saturday')+':</b></td><td>'	+wspup.formatOpeningHour(item.opening_hours, 'SA')+	'</td></tr>';
+			result += '<tr><td width="90px;"><b>'+wspup.getTranslation('sunday')+':</b></td><td>'	+wspup.formatOpeningHour(item.opening_hours, 'SU')+	'</td></tr>';
 
 			result += '</table>';
 			result += '</div>'
@@ -161,25 +165,25 @@ var wspup = {
 	getWeekDayFromshort: function(day){
 		switch(day) {
 		    case 'MO':
-		        return 'Mandag'
+		        return wspup.getTranslation('monday');
 		        break;
 		    case 'TU':
-		        return 'Tirsdag'
+		        return wspup.getTranslation('tuesday');
 		        break;
 		    case 'WE':
-		    	return 'Onsdag'
+		    	return wspup.getTranslation('wednesday');
 		    	break;
 		    case 'TH':
-		    	return 'Torsdag'
+		    	return wspup.getTranslation('thursday');
 		    	break;
 		    case 'FR':
-		    	return 'Fredag'
+		    	return wspup.getTranslation('friday');
 		    	break;
 		    case 'SA':
-		    	return 'Lørdag'
+		    	return wspup.getTranslation('saturday');
 		    	break;
 		    case 'SU':
-		    	return 'Søndag'
+		    	return wspup.getTranslation('sunday');
 		    	break;
 		    default:
 		        return ''
@@ -413,7 +417,7 @@ var wspup = {
 		var carrier  = selected.children('.shop_carrier').val();
 
 		var text = '<div class="wspup_confirmation">';
-		text += '<h3>Valgt afhentningssted</h3>'; 
+		text += '<h3>'+wspup.getTranslation('selected_pickup_point')+'</h3>'; 
 		text += '<p>' + name + '</p>';
 		text += '<p>' + address + '</p>'; 
 		text += '<p>' + zip + ' ' + city + '</p>';

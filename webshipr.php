@@ -95,7 +95,8 @@ class WebshiprAPI{
 			"SubTotalPrice" => $shipment->SubTotalPrice,
 			"TotalPrice" => $shipment->TotalPrice,
 			"Currency"	=> $shipment->Currency,
-			"custom_pickup_identifier" => $shipment->custom_pickup_identifier
+			"custom_pickup_identifier" => $shipment->custom_pickup_identifier, 
+			"swipbox_size" => $shipment->swipbox_size
 		);
 
 		$ch = curl_init($this->base_host."/API/create_shipment");
@@ -165,6 +166,7 @@ class Shipment{
 		public $TotalPrice;
 		public $Currency;
 		public $custom_pickup_identifier;
+		public $swipbox_size;
 }
 
 class ShipmentAddress{

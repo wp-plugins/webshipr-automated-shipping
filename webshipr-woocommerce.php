@@ -6,7 +6,7 @@ Plugin URI: http://www.webshipr.com
 Description: Automated shipping for WooCommerce
 Author: webshipr.com
 Author URI: http://www.webshipr.com
-Version: 2.0.3
+Version: 2.0.4
 
 */
 
@@ -93,6 +93,8 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
                 add_action('woocommerce_thankyou', array($this, 'auto_process_order'));
                 register_activation_hook(__FILE__, array($this,'activate'));
 
+                // Localization 
+                load_plugin_textdomain('WebshiprWC', false, basename( dirname( __FILE__ ) ) . '/languages' );
 
                 // Initialize settings
                 $this->options = get_settings('webshipr_options');
@@ -335,6 +337,12 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
                                     <i>This setting is typically used if you have a warehouse integration. It means that it will automatically send the order to webshipr, when its created.</i>
                                 </td>
                             </tr>
+                            <tr valign="top"><th scope="row">Show swipbox settings</th>
+                                <td>
+                                    <input type="checkbox" name="<?php echo $this->option_name?>[swipbox]" <?php echo (int)$options['swipbox'] == 1 ? "checked" : "" ?> />
+                                    <i>Shows parcel size for order. Needed for swipbox, if you deliver parcels directly in parcel stations.</i>
+                                </td>
+                            </tr>
                         </table>
                         <p class="submit">
                             <input type="submit" class="button-primary" value="<?php _e('Save Changes') ?>" />
@@ -353,6 +361,7 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
                 $valid['auto_process'] = ($input['auto_process'] == 'on' ? true : false);
                 $valid['show_search_address'] = ($input['show_search_address'] == 'on' ? true : false);
                 $valid['show_address_bar'] = ($input['show_address_bar'] == 'on' ? true : false);
+                $valid['swipbox'] = ($input['swipbox'] == 'on' ? true : false);
 
                 $api = $this->ws_api($valid['api_key']);
                 $check = $api->CheckConnection();
@@ -409,7 +418,7 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 
                 // If user tried to process or reprocess - handle this.
                 if($_GET["webshipr_process"] == 'true'){
-                    $this->WooOrderToWebshipr($woo_order, $_GET["ws_rate"]);
+                    $this->WooOrderToWebshipr($woo_order, $_GET["ws_rate"], $_GET["swipbox"]);
                 }elseif($_GET["webshipr_reprocess"] == 'true'){
                     $api->SetAndProcessOrder($woo_order->id, $_GET["ws_rate"]);
                 }
@@ -500,6 +509,19 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
                         }
 
                         echo "</select>&nbsp;";
+
+                        // Select swipbox size
+                        if((int)$this->options['swipbox'] == 1){
+                            echo '<select name="swipbox" id="swipbox">';
+                            echo '<option value="1">Small</option>';
+                            echo '<option value="2">Medium</option>';
+                            echo '<option value="3">Large</option>';
+                            echo '<option value="101">Oversize 1</option>';
+                            echo '<option value="102">Oversize 2</option>';
+                            echo '<option value="103">Oversize 3</option>';
+                            echo '</select>';
+                        }
+
                         echo "<a onClick=\"process_order()\" href=\"#\">Process order</a>";
 
                         // This is already within a form, so we need a workaround to submit data for processing
@@ -509,9 +531,12 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
                                     function process_order(){
                                         var e = document.getElementById(\"ws_rate\");
                                         var strId = e.options[e.selectedIndex].value;
+                                        var s = document.getElementById(\"swipbox\");
+                                        var strS = s.options[s.selectedIndex].value;
+
                                         var cur_url = document.URL.split(\"&webshipr_process=true\")[0].split(\"&webshipr_reprocess=true\")[0];
 
-                                        window.location = cur_url+\"&webshipr_process=true&ws_rate=\"+strId;
+                                        window.location = cur_url+\"&webshipr_process=true&ws_rate=\"+strId+\"&swipbox=\"+strS;
                                     }
                             </script>
                         ";
@@ -591,7 +616,7 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
             }
 
             // Method to create the order in Webshipr
-            private function WooOrderToWebshipr($woo_order, $rate_id){
+            private function WooOrderToWebshipr($woo_order, $rate_id, $swipbox){
 
                 global $wpdb;
 
@@ -652,6 +677,7 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
                 $shipment->SubTotalPrice    = $woo_order->order_total - $woo_order->order_shipping - $woo_order->order_shipping_tax - $woo_order->order_tax;
                 $shipment->TotalPrice       = $woo_order->order_total - $woo_order->order_shipping - $woo_order->order_shipping_tax;
                 $shipment->Currency         = get_woocommerce_currency();
+                $shipment->swipbox_size     = $swipbox; 
 
 
                 // Check if the order has a dynamic address
@@ -687,6 +713,9 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
                  {
                     case "not_recognized":
                         return "<font style='color: red;'>Not recognized</font><br/> <i>(usually means the shipment wasnt processed with a rate from webshipr)</i>";
+                        break;
+                    case "choose_size":
+                        return "<font style='color: red;'>Choose size</font><br/> <i>(SwipBox needs to know the size of your parcel. Select size in webshipr.)</i>";
                         break;
                     case "country_rejected":
                         return "<font style='color: yellow;'>Country rejected</font><br/> <i>( Means the shipping rate is configured to deny this country in webshipr )</i>";
