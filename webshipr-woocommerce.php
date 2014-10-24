@@ -529,14 +529,22 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
                         echo "
                             <script>
                                     function process_order(){
+
                                         var e = document.getElementById(\"ws_rate\");
+                                       
                                         var strId = e.options[e.selectedIndex].value;
                                         var s = document.getElementById(\"swipbox\");
-                                        var strS = s.options[s.selectedIndex].value;
 
+                                        if(s !== null){
+                                            var strS = s.options[s.selectedIndex].value;
+                                        }
                                         var cur_url = document.URL.split(\"&webshipr_process=true\")[0].split(\"&webshipr_reprocess=true\")[0];
 
-                                        window.location = cur_url+\"&webshipr_process=true&ws_rate=\"+strId+\"&swipbox=\"+strS;
+                                        if(s !== null){
+                                            window.location = cur_url+\"&webshipr_process=true&ws_rate=\"+strId+\"&swipbox=\"+strS;
+                                        }else{
+                                            window.location = cur_url+\"&webshipr_process=true&ws_rate=\"+strId;
+                                        }
                                     }
                             </script>
                         ";
