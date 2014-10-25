@@ -47,7 +47,8 @@
 </div>
 
 <div class="wspup_cart">
-	<input type="button" class="button" value="<?php echo  __('Choose pickup point', 'WebshiprWC'); ?>" id="wspup_show_btn" onClick="wspup.showPup();wspupTransferAddress();">
+	<input type="button" class="button" style="float: none;" value="<?php echo  __('Choose pickup point', 'WebshiprWC'); ?>" id="wspup_show_btn" onClick="wspup.showPup();wspupTransferAddress();">
+	
 	<input type="hidden" name="wspup_name">
 	<input type="hidden" name="wspup_address">
 	<input type="hidden" name="wspup_zip">

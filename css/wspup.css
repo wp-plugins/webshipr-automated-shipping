@@ -40,6 +40,7 @@
 .wspup_cart{
 	text-align: center;
 	width: 100%;
+	display: relative; 
 }
 #wspup_selected_text{
 	width: 100%; 

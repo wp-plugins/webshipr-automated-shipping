@@ -58,4 +58,5 @@ It's free to try for 30 days. Sign up on http://www.webshipr.com.
 * 2.0.0: New plugin - PUPs are picked in lightbox with map. Entirely new design.
 * 2.0.1: Bugfix: Search PUPs again, when rate has changed
 * 2.0.4: Internationalization and support for swipbox applied.
+* 2.0.5: I18n Bugfix
 -------------------------
