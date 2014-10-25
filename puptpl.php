@@ -4,7 +4,7 @@
 		<div id="wspup_zipbox">
 			<input  class="wspup_input" id="wspup_address" placeholder="<?php echo  __('Address', 'WebshiprWC'); ?>">  
 			<input  class="wspup_input" id="wspup_zip" placeholder="<?php echo  __('ZIP', 'WebshiprWC'); ?>"> 
-			<input type="button" class="button" value="<?php echo  __('Search', 'WebshiprWC'); ?>" id="wspup_search_btn">
+			<input type="button" class="button" value="<?php echo  __('Search', 'WebshiprWC'); ?>" id="wspup_search_btn" style="float:none;">
 		</div>
 		<div id="wspup_noresults">
 			<br>
