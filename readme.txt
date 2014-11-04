@@ -2,7 +2,7 @@
 Contributors: Webshipr 
 link: http://www.webshipr.dk
 Tags: shipping, valgfrit afhentningssted, automated shipping, post danmark, postdk, bluewater,blue water,woocommerce, automatic shipping, dropshipping, webshipr, webshipper, GLS, Bring
-Stable tag: 2.0.4
+Stable tag: 2.0.5
 Requires at least: 3.7
 Tested up to: 4.0.0
 
@@ -59,4 +59,5 @@ It's free to try for 30 days. Sign up on http://www.webshipr.com.
 * 2.0.1: Bugfix: Search PUPs again, when rate has changed
 * 2.0.4: Internationalization and support for swipbox applied.
 * 2.0.5: I18n Bugfix
+* 2.0.6: Autoprocess problem resolved
 -------------------------

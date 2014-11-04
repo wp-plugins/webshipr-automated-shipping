@@ -6,7 +6,7 @@ Plugin URI: http://www.webshipr.com
 Description: Automated shipping for WooCommerce
 Author: webshipr.com
 Author URI: http://www.webshipr.com
-Version: 2.0.5
+Version: 2.0.6
 
 */
 
@@ -624,7 +624,7 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
             }
 
             // Method to create the order in Webshipr
-            private function WooOrderToWebshipr($woo_order, $rate_id, $swipbox){
+            private function WooOrderToWebshipr($woo_order, $rate_id, $swipbox = null){
 
                 global $wpdb;
 
