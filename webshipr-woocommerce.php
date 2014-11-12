@@ -6,7 +6,7 @@ Plugin URI: http://www.webshipr.com
 Description: Automated shipping for WooCommerce
 Author: webshipr.com
 Author URI: http://www.webshipr.com
-Version: 2.0.6
+Version: 2.0.7
 
 */
 
@@ -89,8 +89,6 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
                 wp_localize_script( 'get_shops', 'wsAjax', array( 'ajaxurl' => admin_url( 'admin-ajax.php' ))); 
 
 
-                // Autoprocess hook
-                add_action('woocommerce_thankyou', array($this, 'auto_process_order'));
                 register_activation_hook(__FILE__, array($this,'activate'));
 
                 // Localization 
@@ -198,17 +196,6 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
                 wp_send_json_success(array("rate" => $_REQUEST['rate_id'], "dyn" => $is_dyn_required));
            }
 
-           // Auto process
-           public function auto_process_order($order = 0){
-                if((int)$this->options['auto_process'] == 1 && (int)$order > 0){
-                    $woo_order = new WC_Order($order);
-                    $woo_method_array = reset($woo_order->get_shipping_methods());
-                    $ws_rate_id = (preg_match("/WS/", $woo_method_array["method_id"]) ? str_replace("WS", "", $woo_method_array["method_id"]) : -1);
-                    // Place order
-                    $this->WooOrderToWebshipr($woo_order, $ws_rate_id);
-                }
-                 
-           }
 
            // Order placed
            public function order_placed($order_id){
@@ -235,6 +222,17 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
                     ));
 
                 }
+
+                // Autoprocess logic
+                if((int)$this->options['auto_process'] == 1 && (int)$order_id > 0){
+                    $woo_order = new WC_Order($order_id);
+                    $woo_method_array = reset($woo_order->get_shipping_methods());
+                    $ws_rate_id = (preg_match("/WS/", $woo_method_array["method_id"]) ? str_replace("WS", "", $woo_method_array["method_id"]) : -1);
+                   
+                    // Place order
+                    $this->WooOrderToWebshipr($woo_order, $ws_rate_id);
+                }
+
             }
 
            // Create Webshipr table to store pickup places for orders

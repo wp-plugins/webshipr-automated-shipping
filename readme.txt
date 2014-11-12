@@ -2,7 +2,7 @@
 Contributors: Webshipr 
 link: http://www.webshipr.dk
 Tags: shipping, valgfrit afhentningssted, automated shipping, post danmark, postdk, bluewater,blue water,woocommerce, automatic shipping, dropshipping, webshipr, webshipper, GLS, Bring
-Stable tag: 2.0.5
+Stable tag: 2.0.7
 Requires at least: 3.7
 Tested up to: 4.0.0
 
@@ -19,9 +19,12 @@ It's free to try for 30 days. Sign up on http://www.webshipr.com.
 * Integrate Post Danmark
 * Integrate Post Danmark valgfrit afhentningssted
 * Integrate Blue Water shipping
-* Integrate With Warehouse partners
-* Integrate With GLS Shipping ( print labels, transfer data to MyGLS )
-* Integrate With GLS Pakkeshop
+* Integrate with Warehouse partners
+* Integrate with GLS Shipping ( print labels, transfer data to MyGLS )
+* Integrate with GLS Pakkeshop
+* Integrate with Swipbox
+* Integrate with DHL Express
+
 -------------------------
 
 == Installation ==
@@ -60,4 +63,5 @@ It's free to try for 30 days. Sign up on http://www.webshipr.com.
 * 2.0.4: Internationalization and support for swipbox applied.
 * 2.0.5: I18n Bugfix
 * 2.0.6: Autoprocess problem resolved
+* 2.0.7: Autoprocess hook moved in order to ensure persistent functionality.
 -------------------------
