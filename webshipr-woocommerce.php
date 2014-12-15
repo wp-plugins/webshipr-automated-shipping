@@ -6,7 +6,7 @@ Plugin URI: http://www.webshipr.com
 Description: Automated shipping for WooCommerce
 Author: webshipr.com
 Author URI: http://www.webshipr.com
-Version: 2.0.7
+Version: 2.0.8
 
 */
 
@@ -77,6 +77,8 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
                 add_action('woocommerce_checkout_update_order_meta', array($this, 'override_delivery'));
                 add_action('woocommerce_checkout_process', array($this, 'validate_on_process')); 
 
+                // Autoprocess
+                add_action('woocommerce_payment_complete', array($this, 'auto_process'));
 
                 // Hook ajax methods
                 add_action("wp_ajax_nopriv_check_rates", array($this, "check_rates"));
@@ -97,6 +99,21 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
                 // Initialize settings
                 $this->options = get_settings('webshipr_options');
 
+           }
+
+           // Autoprocess
+           public function auto_process($order_id){
+               
+                // Autoprocess logic
+                if((int)$this->options['auto_process'] == 1 && (int)$order_id > 0){
+                    $woo_order = new WC_Order($order_id);
+                    $woo_method_array = reset($woo_order->get_shipping_methods());
+                    $ws_rate_id = (preg_match("/WS/", $woo_method_array["method_id"]) ? str_replace("WS", "", $woo_method_array["method_id"]) : -1);
+                   
+                    // Place order
+                    $this->WooOrderToWebshipr($woo_order, $ws_rate_id);
+                }
+           
            }
 
            // Get shops AJAX
@@ -223,15 +240,7 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 
                 }
 
-                // Autoprocess logic
-                if((int)$this->options['auto_process'] == 1 && (int)$order_id > 0){
-                    $woo_order = new WC_Order($order_id);
-                    $woo_method_array = reset($woo_order->get_shipping_methods());
-                    $ws_rate_id = (preg_match("/WS/", $woo_method_array["method_id"]) ? str_replace("WS", "", $woo_method_array["method_id"]) : -1);
-                   
-                    // Place order
-                    $this->WooOrderToWebshipr($woo_order, $ws_rate_id);
-                }
+
 
             }
 
@@ -806,7 +815,8 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
                 public function calculate_shipping( $package ) {
                     global $woocommerce;
 		            $total = 0; 
-                        
+                    $coupon_free_shipping = false; 
+
     	            // Calculate cart total incl. taxes
         		    if(count($package["contents"] > 0)){
             			foreach($package["contents"] as $content){
@@ -819,6 +829,11 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
                         foreach($package['applied_coupons'] as $coupon){
                                 $obj = new WC_Coupon($coupon);
                                 $total = $total - $obj->amount;
+
+                                // check if coupon grants free shipping
+                                if($obj->free_shipping){
+                                    $coupon_free_shipping = true; 
+                                }
                         }
                     }
 
@@ -846,7 +861,7 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
                                 $new_rate = array(
                                     'id' => "WS".$rate->id,
                                     'label' => $rate->name,
-                                    'cost' => $rate->price,
+                                    'cost' => ($coupon_free_shipping ? 0 : $rate->price ),
                                     'taxes' => ($rate->tax_percent > 0 ? '' : false), 
                                     'calc_tax' => 'per_order'
                                 );
