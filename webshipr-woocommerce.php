@@ -6,7 +6,7 @@ Plugin URI: http://www.webshipr.com
 Description: Automated shipping for WooCommerce
 Author: webshipr.com
 Author URI: http://www.webshipr.com
-Version: 2.0.8
+Version: 2.0.9
 
 */
 
@@ -831,7 +831,7 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
                                 $total = $total - $obj->amount;
 
                                 // check if coupon grants free shipping
-                                if($obj->free_shipping){
+                                if($obj->free_shipping == 'yes'){
                                     $coupon_free_shipping = true; 
                                 }
                         }
