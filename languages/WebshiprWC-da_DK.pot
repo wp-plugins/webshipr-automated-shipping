@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Webshipr for WooCommerce\n"
-"POT-Creation-Date: 2014-10-24 11:20+0100\n"
-"PO-Revision-Date: 2014-10-24 11:20+0100\n"
+"POT-Creation-Date: 2015-02-12 19:21+0100\n"
+"PO-Revision-Date: 2015-02-12 19:21+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: da\n"
@@ -18,93 +18,108 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Poedit-SearchPath-0: .\n"
 
-#: puptpl.php:2
+#: puptpl.php:3
+msgid "Pickup location"
+msgstr "Afhentningssted"
+
+#: puptpl.php:7
 msgid "Select pickup point"
 msgstr "Vælg afhentningssted"
 
-#: puptpl.php:5
+#: puptpl.php:10
 msgid "Address"
 msgstr "Adresse"
 
-#: puptpl.php:6
+#: puptpl.php:11
 msgid "ZIP"
 msgstr "Post nr."
 
-#: puptpl.php:7
+#: puptpl.php:12
 msgid "Search"
 msgstr "Søg"
 
-#: puptpl.php:11
+#: puptpl.php:16
 msgid "Sorry! We couldnt find any pickup points. Try again!"
 msgstr "Beklager! Vi kunne ikke finde noget afhentningssted. Prøv igen!"
 
-#: puptpl.php:17
+#: puptpl.php:22
 msgid "We are looking for the nearest pickup points..."
 msgstr "Vi leder efter de nærmeste afhentningssteder..."
 
-#: puptpl.php:22
+#: puptpl.php:27
 msgid "Use the search field above to find a pickup point near you."
 msgstr "Brug søgefeltet ovenfor og find et afhentningssted nær dig."
 
-#: puptpl.php:34
+#: puptpl.php:39
 msgid "Confirm pickup point"
 msgstr "Bekræft afhentningssted"
 
-#: puptpl.php:35
+#: puptpl.php:40
 msgid "Click here"
 msgstr "Klik her"
 
-#: puptpl.php:41
+#: puptpl.php:46
 msgid "Close window"
 msgstr "Luk vindue"
 
-#: puptpl.php:50
+#: puptpl.php:55
 msgid "Choose pickup point"
 msgstr "Vælg afhentningssted"
 
-#: puptpl.php:59
+#: puptpl.php:65
 msgid "Selected pickup point"
 msgstr "Valgt afhentningssted"
 
-#: puptpl.php:60
+#: puptpl.php:66
 msgid "Opening hours"
 msgstr "Åbningstider"
 
-#: puptpl.php:61
+#: puptpl.php:67
 msgid "See opening hours"
 msgstr "Se åbningstider"
 
-#: puptpl.php:62
+#: puptpl.php:68
 msgid "Monday"
 msgstr "Mandag"
 
-#: puptpl.php:63
+#: puptpl.php:69
 msgid "Tuesday"
 msgstr "Tirsdag"
 
-#: puptpl.php:64
+#: puptpl.php:70
 msgid "Wednesday"
 msgstr "Onsdag"
 
-#: puptpl.php:65
+#: puptpl.php:71
 msgid "Thursday"
 msgstr "Torsdag"
 
-#: puptpl.php:66
+#: puptpl.php:72
 msgid "Friday"
 msgstr "Fredag"
 
-#: puptpl.php:67
+#: puptpl.php:73
 msgid "Saturday"
 msgstr "Lørdag"
 
-#: puptpl.php:68
+#: puptpl.php:74
 msgid "Sunday"
 msgstr "Søndag"
 
-#: webshipr-woocommerce.php:348
+#: webshipr-woocommerce.php:172
+msgid "Select a pickup point to proceed"
+msgstr "Vælg venligst afhentningssted"
+
+#: webshipr-woocommerce.php:361
 msgid "Save Changes"
 msgstr "Gem ændringer"
+
+#, fuzzy
+#~ msgid "Please select a pickup point"
+#~ msgstr "Vælg afhentningssted"
+
+#~ msgid "Where do you want to pickup your order?"
+#~ msgstr "Hvor vil du hente din ordre?"
 
 #~ msgid "Fredag"
 #~ msgstr "Fredag"

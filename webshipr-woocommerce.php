@@ -6,7 +6,7 @@ Plugin URI: http://www.webshipr.com
 Description: Automated shipping for WooCommerce
 Author: webshipr.com
 Author URI: http://www.webshipr.com
-Version: 2.0.9
+Version: 2.1.0
 
 */
 
@@ -62,10 +62,16 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
                 // Hook actions
                 add_action('woocommerce_admin_order_data_after_order_details', array($this,'show_on_order'));
 
-                //if ( version_compare( $woocommerce->version, '2.1', '<' ) ) {
-                //    add_action('woocommerce_review_order_after_order_total', array($this,'append_dynamic'));
+
+                /* 
+                    As per woocommerce 2.3 reveiw-order.php and payment section was seperated. 
+                    Therefore hook has changed, and PUP content moved 
+                */
+
+                //if ( version_compare( $woocommerce->version, '2.2', '<' ) ) {
+                    add_action('woocommerce_review_order_before_order_total', array($this,'append_dynamic'));
                 //}else{
-                    add_action('woocommerce_review_order_before_payment', array($this,'append_dynamic'));
+                 //   add_action('woocommerce_review_order_before_payment', array($this,'append_dynamic'));
                 //}
 
                 add_action('admin_init', array($this, 'admin_init'));
@@ -163,7 +169,7 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
                 }
                 
                if($is_dyn_required && strlen($_REQUEST["wspup_id"]) == 0){
-                    $woocommerce->add_error("Venligst vælg et afhentningssted, eller vælg en anden fragtrate"); 
+                    wc_add_notice( __('Select a pickup point to proceed' , 'WebshiprWC'), "error"); 
                }
 
            }

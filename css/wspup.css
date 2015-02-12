@@ -26,7 +26,7 @@
 	display: block !important;
 }
 #wspup_show_btn{
-	margin: 13px;
+	/*margin: 13px;*/
 }
 #wspup_wrapper h1{
 	font-size: 22pt; 
@@ -38,13 +38,11 @@
 	padding: 10px;
 }
 .wspup_cart{
-	text-align: center;
 	width: 100%;
-	display: relative; 
 }
 #wspup_selected_text{
 	width: 100%; 
-	text-align: center; 
+	margin-top: 20px;  
 }
 #wspup_selected_text p{
 	margin: 2px;
@@ -138,16 +136,18 @@
 
 }
 
+/* Important rules used to overrule certain themes, which makes the button invisible - sorry */
+
 #wspup_search_btn{
 	background: none;
 	border-radius: 0; 
 	font-family: Arial;
-	border:solid 1px #ccc; 
+	border:solid 1px #ccc !important; 
 	padding:4px; 
 	margin:0;  
 	font-size:1.1em;
 	font-weight:normal;
-	color:#333;
+	color:#333 !important;
 	box-shadow: none;
 	cursor:pointer;	 
 
