@@ -6,7 +6,7 @@ Plugin URI: http://www.webshipr.com
 Description: Automated shipping for WooCommerce
 Author: webshipr.com
 Author URI: http://www.webshipr.com
-Version: 2.1.0
+Version: 2.1.1
 
 */
 
@@ -645,18 +645,21 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 
                 // Create Items and collect info
                 $ws_items = array();
-                $total_weight = 0;
+                
 
                 foreach($items as $item){
-                    $product = new WC_Product($item["product_id"]);
-                    $ws_items[] = new ShipmentItem($product->get_sku(), $item["name"], $item["product_id"], $item["qty"], "pcs", 0);
+
                     $weight_uom = get_option('woocommerce_weight_unit');
 
                     if($weight_uom == 'kg'){
-                        $total_weight += (double)get_product($item["product_id"])->get_weight()*(double)$item["qty"]*1000;
+                        $weight = (double)get_product($item["product_id"])->get_weight()*(double)$item["qty"]*1000;
                     }else{
-                        $total_weight += (double)get_product($item["product_id"])->get_weight()*(double)$item["qty"];
+                        $weight += (double)get_product($item["product_id"])->get_weight()*(double)$item["qty"];
                     }
+
+                    $product = new WC_Product($item["product_id"]);
+                    $ws_items[] = new ShipmentItem($product->get_sku(), $item["name"], $item["product_id"], $item["qty"], "pcs", $weight);
+                    
                 }
 
 
@@ -692,7 +695,6 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
                 $shipment->BillingAddress   = $bill_adr;
                 $shipment->DeliveryAddress  = $deliv_adr;
                 $shipment->Items            = $ws_items;
-                $shipment->Weight           = $total_weight;
                 $shipment->ExtRef           = $woo_order->id;
                 $shipment->ShippingRate     = $rate_id;
                 $shipment->SubTotalPrice    = $woo_order->order_total - $woo_order->order_shipping - $woo_order->order_shipping_tax - $woo_order->order_tax;
