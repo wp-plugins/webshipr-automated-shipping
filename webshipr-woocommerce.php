@@ -6,7 +6,7 @@ Plugin URI: http://www.webshipr.com
 Description: Automated shipping for WooCommerce
 Author: webshipr.com
 Author URI: http://www.webshipr.com
-Version: 2.1.1
+Version: 2.1.2
 
 */
 
@@ -652,9 +652,19 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
                     $weight_uom = get_option('woocommerce_weight_unit');
 
                     if($weight_uom == 'kg'){
-                        $weight = (double)get_product($item["product_id"])->get_weight()*(double)$item["qty"]*1000;
+                        if((int)$item["variation_id"] > 0){
+                            $variation = new WC_Product_Variation($item["variation_id"]);
+                            $weight = (double)$variation->get_weight()*(double)$item["qty"]*1000;
+                        }else{
+                            $weight = (double)get_product($item["product_id"])->get_weight()*(double)$item["qty"]*1000;
+                        }
                     }else{
-                        $weight += (double)get_product($item["product_id"])->get_weight()*(double)$item["qty"];
+                        if((int)$item["variation_id"] > 0){
+                            $variation = new WC_Product_Variation($item["variation_id"]);
+                            $weight = (double)$variation->get_weight()*(double)$item["qty"];
+                        }else{
+                            $weight = (double)get_product($item["product_id"])->get_weight()*(double)$item["qty"];
+                        }
                     }
 
                     $product = new WC_Product($item["product_id"]);

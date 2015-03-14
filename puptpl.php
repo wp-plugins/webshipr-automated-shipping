@@ -1,8 +1,8 @@
-<tr>
-	<th>
+<tr class="wspup_row">
+	<th class="wspup_th">
 		 <?php echo __('Pickup location', 'WebshiprWC'); ?>
 	</th>
-	<td>
+	<td class="wspup_td">
 		<div id="wspup_wrapper">
 			<?php echo '<h1>' . __('Select pickup point', 'WebshiprWC') . '</h1>'; ?>
 			<div id="wspup_container">
