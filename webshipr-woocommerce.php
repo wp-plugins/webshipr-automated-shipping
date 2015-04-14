@@ -6,7 +6,7 @@ Plugin URI: http://www.webshipr.com
 Description: Automated shipping for WooCommerce
 Author: webshipr.com
 Author URI: http://www.webshipr.com
-Version: 2.1.2
+Version: 2.1.3
 
 */
 
@@ -419,7 +419,8 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
                 
                 // Depending on woocommerce version, get the shipping method
                 if(method_exists($woo_order, 'get_shipping_methods')){
-                        $woo_method_array = reset($woo_order->get_shipping_methods());
+                        $arr = $woo_order->get_shipping_methods();
+                        $woo_method_array = reset($arr);
                         $woo_order_id = $woo_method_array["method_id"];
                 }else{
                         $woo_order_id = $woo_order->shipping_method;
@@ -429,11 +430,16 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 
                 $rate_name = $this->get_rate_name($ws_rate_id,$rates);
 
-                // If user tried to process or reprocess - handle this.
-                if($_GET["webshipr_process"] == 'true'){
-                    $this->WooOrderToWebshipr($woo_order, $_GET["ws_rate"], $_GET["swipbox"]);
-                }elseif($_GET["webshipr_reprocess"] == 'true'){
-                    $api->SetAndProcessOrder($woo_order->id, $_GET["ws_rate"]);
+                // If user tried to process or reprocess - handle this. 
+                if(isset($_GET["webshipr_process"])){
+                    if($_GET["webshipr_process"] == 'true'){
+                        $this->WooOrderToWebshipr($woo_order, $_GET["ws_rate"], $_GET["swipbox"]);
+                    }
+                }
+                if(isset($_GET["webshipr_reprocess"])){
+                    if($_GET["webshipr_reprocess"] == 'true'){
+                        $api->SetAndProcessOrder($woo_order->id, $_GET["ws_rate"]);
+                    }
                 }
 
                 
