@@ -32,7 +32,7 @@
 	font-size: 22pt; 
 	font-family: Arial;
 	text-shadow: none;
-	margin-top: 40px;
+	margin-top: 20px;
 }
 #wspup_zipbox{
 	padding: 10px;
@@ -427,5 +427,26 @@
 }
 
 
+@media all and (max-height: 1000px) {
+
+	#wspup_select_list ol li > p {
+	    font-size: 6pt !important;
+	}
+	#wspup_container{
+		max-height: 300px !important;
+		height: 300px;
+	}
+
+	#wspup_address{
+		width: 140px !important; 
+	}
+	#wspup_select_list ol, #wspup_select_list{
+		width: 300px;
+		height: 190px !important;
+		display: block;
+		position:relative;
+	}
+
+}
 
 
