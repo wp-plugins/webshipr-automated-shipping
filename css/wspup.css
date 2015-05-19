@@ -426,8 +426,8 @@
 	.wspup_watermark{display: none !important;}
 }
 
-/*
-@media all and (max-height: 960px) {
+
+@media all and (max-height: 800px) and (max-width: 500px){
 
 	#wspup_select_list ol li > p {
 	    font-size: 6pt !important;
@@ -448,6 +448,6 @@
 	}
 
 }
-*/
+
 
 
