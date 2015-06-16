@@ -189,14 +189,16 @@ class ShipmentItem{
 		public $Quantity;
 		public $UOM;
 		public $Weight;
+		public $Location;
 
-		public function __construct($Description, $ProductName, $ProductNo, $Quantity, $UOM,$Weight){
+		public function __construct($Description, $ProductName, $ProductNo, $Quantity, $UOM,$Weight, $Location){
 			$this->Description = $Description;
 			$this->ProductName = $ProductName;
 			$this->ProductNo = $ProductNo;
 			$this->Quantity = $Quantity;
 			$this->UOM = $UOM;
 			$this->Weight = $Weight;
+			$this->Location = $Location;
 		}
 
 }

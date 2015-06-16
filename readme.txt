@@ -70,4 +70,5 @@ It's free to try for 30 days. Sign up on http://www.webshipr.com.
 * 2.1.2: Weight for Variations calculated. Extra classes applied to checkout for better customization.
 * 2.1.3: Minor updates to satisfy strict php criterias.
 * 2.1.4: Improved responsiveness for iphone 4
+* 2.1.5: Applied stock location for warehouse services
 -------------------------

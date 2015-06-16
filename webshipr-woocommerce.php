@@ -6,7 +6,7 @@ Plugin URI: http://www.webshipr.com
 Description: Automated shipping for WooCommerce
 Author: webshipr.com
 Author URI: http://www.webshipr.com
-Version: 2.1.4
+Version: 2.1.5
 
 */
 
@@ -105,7 +105,43 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
                 // Initialize settings
                 $this->options = get_settings('webshipr_options');
 
+                // Need to add extra field for locations
+                // Display Field
+                add_action( 'woocommerce_product_options_general_product_data', array($this, 'woo_add_custom_general_fields') );
+                // Save Field
+                add_action( 'woocommerce_process_product_meta', array($this, 'woo_add_custom_general_fields_save' ));
+
            }
+
+
+            // Update product location 
+           function woo_add_custom_general_fields_save( $post_id ){
+                $woocommerce_text_field = $_POST['_webshipr_location'];
+                if( !empty( $woocommerce_text_field ) )
+                        update_post_meta( $post_id, '_webshipr_location', esc_attr( $woocommerce_text_field ) );
+
+            }
+
+            // Add field under product for stock location
+            function woo_add_custom_general_fields() {
+
+                      global $woocommerce, $post;
+
+                      echo '<div class="options_group">';
+
+                      woocommerce_wp_text_input(
+                            array(
+                                    'id'          => '_webshipr_location',
+                                    'label'       => __( 'Webshipr stock location', 'woocommerce' ),
+                                    'placeholder' => '',
+                                    'desc_tip'    => 'true',
+                                    'description' => __( 'This is the stock location that will get transfered to webshipr', 'woocommerce' )
+                            )
+                    );
+
+                      echo '</div>';
+
+            }
 
            // Autoprocess
            public function auto_process($order_id){
@@ -674,7 +710,8 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
                     }
 
                     $product = new WC_Product($item["product_id"]);
-                    $ws_items[] = new ShipmentItem($product->get_sku(), $item["name"], $item["product_id"], $item["qty"], "pcs", $weight);
+                    $location = get_post_meta( $item["product_id"], '_webshipr_location', true );
+                    $ws_items[] = new ShipmentItem($product->get_sku(), $item["name"], $item["product_id"], $item["qty"], "pcs", $weight, $location);
                     
                 }
 
