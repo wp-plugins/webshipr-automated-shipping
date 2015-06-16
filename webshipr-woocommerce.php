@@ -6,7 +6,7 @@ Plugin URI: http://www.webshipr.com
 Description: Automated shipping for WooCommerce
 Author: webshipr.com
 Author URI: http://www.webshipr.com
-Version: 2.1.5
+Version: 2.1.6
 
 */
 
@@ -40,24 +40,7 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 
            // Constructor to be initialized
            public function __construct() {
-                global $woocommerce;
-
-                // Register JS
-                wp_enqueue_script("jquery"); 
-                wp_register_script("ws_maps", "https://maps.googleapis.com/maps/api/js?sensor=false"); 
-                wp_register_script("ws_maplabel", plugins_url("js/maplabel.js", __FILE__));
-                wp_register_script("ws_pup", plugins_url("js/wspup.js", __FILE__));
-                wp_register_script("ws_js", plugins_url("js/webshipr.js", __FILE__));
-                
-                wp_enqueue_script('ws_maps');
-                wp_enqueue_script('ws_maplabel');
-                wp_enqueue_script('ws_pup');
-                wp_enqueue_script('ws_js');
-
-                // Register CSS
-                wp_register_style("ws_css", plugins_url("css/wspup.css", __FILE__));
-                wp_enqueue_style('ws_css');
-                
+                global $woocommerce;                
 
                 // Hook actions
                 add_action('woocommerce_admin_order_data_after_order_details', array($this,'show_on_order'));
@@ -78,6 +61,12 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
                 add_action('admin_menu', array($this, 'add_page'));
 
 
+                // Register and load JS and CSS
+                add_action('wp_loaded', array($this, 'register_frontend')); 
+                add_action('wp_enqueue_scripts', array($this, 'enqueue_frontend'));
+                add_action('admin_enqueue_scripts', array($this, 'enqueue_backend'));
+
+
                 #add_action('woocommerce_review_order_after_shipping', array($this,'append_dynamic'));
                 add_action('woocommerce_checkout_order_processed', array($this, 'order_placed'));
                 add_action('woocommerce_checkout_update_order_meta', array($this, 'override_delivery'));
@@ -89,12 +78,12 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
                 // Hook ajax methods
                 add_action("wp_ajax_nopriv_check_rates", array($this, "check_rates"));
                 add_action( 'wp_ajax_check_rates', array($this, 'check_rates') );
-                wp_localize_script( 'check_rates', 'wsAjax', array( 'ajaxurl' => admin_url( 'admin-ajax.php' ))); 
+                
                 add_action('woocommerce_after_checkout_shipping_form', array($this, 'set_ajaxurl')); 
 
                 add_action("wp_ajax_nopriv_get_shops", array($this, "ajax_get_shops"));
                 add_action( 'wp_ajax_get_shops', array($this, 'ajax_get_shops') );
-                wp_localize_script( 'get_shops', 'wsAjax', array( 'ajaxurl' => admin_url( 'admin-ajax.php' ))); 
+                
 
 
                 register_activation_hook(__FILE__, array($this,'activate'));
@@ -103,7 +92,7 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
                 load_plugin_textdomain('WebshiprWC', false, basename( dirname( __FILE__ ) ) . '/languages' );
 
                 // Initialize settings
-                $this->options = get_settings('webshipr_options');
+                $this->options = get_option('webshipr_options');
 
                 // Need to add extra field for locations
                 // Display Field
@@ -111,7 +100,59 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
                 // Save Field
                 add_action( 'woocommerce_process_product_meta', array($this, 'woo_add_custom_general_fields_save' ));
 
+
            }
+
+
+           // Register JS scripts
+           function register_frontend(){
+
+                // Register CSS
+                wp_register_style("ws_css", plugins_url("css/wspup.css", __FILE__));
+                
+                // Register JS
+                wp_register_script("ws_maps", "https://maps.googleapis.com/maps/api/js?sensor=false"); 
+                wp_register_script("ws_maplabel", plugins_url("js/maplabel.js", __FILE__));
+                wp_register_script("ws_pup", plugins_url("js/wspup.js", __FILE__));
+                wp_register_script("ws_js", plugins_url("js/webshipr.js", __FILE__));
+
+
+           }
+
+           // Enqueue scripts
+           function enqueue_frontend(){
+
+                // CSS
+                wp_enqueue_style('ws_css');
+
+                // JS
+                wp_enqueue_script("jquery"); 
+                wp_enqueue_script('ws_maps');
+                wp_enqueue_script('ws_maplabel');
+                wp_enqueue_script('ws_pup');
+                wp_enqueue_script('ws_js');
+
+                // Hook ajax stuff
+                wp_localize_script( 'check_rates', 'wsAjax', array( 'ajaxurl' => admin_url( 'admin-ajax.php' ))); 
+                wp_localize_script( 'get_shops', 'wsAjax', array( 'ajaxurl' => admin_url( 'admin-ajax.php' ))); 
+
+           }
+
+           // Enqueue scripts backend
+           function enqueue_backend(){
+
+                // CSS
+                wp_enqueue_style('ws_css');
+
+                // JS
+                wp_enqueue_script("jquery"); 
+                wp_enqueue_script('ws_js');
+
+                // Hook ajax stuff
+                wp_localize_script( 'check_rates', 'wsAjax', array( 'ajaxurl' => admin_url( 'admin-ajax.php' ))); 
+                wp_localize_script( 'get_shops', 'wsAjax', array( 'ajaxurl' => admin_url( 'admin-ajax.php' ))); 
+
+           }           
 
 
             // Update product location 
@@ -145,9 +186,9 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 
            // Autoprocess
            public function auto_process($order_id){
-               
+
                 // Autoprocess logic
-                if((int)$this->options['auto_process'] == 1 && (int)$order_id > 0){
+                if((int)$this->options['auto_process'] == 1 && (int)$order_id > 0){ 
                     $woo_order = new WC_Order($order_id);
                     $woo_method_array = reset($woo_order->get_shipping_methods());
                     $ws_rate_id = (preg_match("/WS/", $woo_method_array["method_id"]) ? str_replace("WS", "", $woo_method_array["method_id"]) : -1);
@@ -322,9 +363,9 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
                 // Get selected rate id
                 if(is_array($woocommerce->session->chosen_shipping_methods)){
     		       $rate_id = $woocommerce->session->chosen_shipping_methods[0]; 
-    	        }elseif(is_array($_POST["shipping_method"])){
+    	        }elseif($_POST && is_array($_POST["shipping_method"])){
                    $rate_id = $_POST["shipping_method"][0];
-                }elseif(is_string($_POST["shipping_method"])){
+                }elseif($_POST && is_string($_POST["shipping_method"])){
                    $rate_id = $_POST["shipping_method"];
                 }else{
                    $rate_id = "not_known";
@@ -469,7 +510,7 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
                 // If user tried to process or reprocess - handle this. 
                 if(isset($_GET["webshipr_process"])){
                     if($_GET["webshipr_process"] == 'true'){
-                        $this->WooOrderToWebshipr($woo_order, $_GET["ws_rate"], $_GET["swipbox"]);
+                        $this->WooOrderToWebshipr($woo_order, $_GET["ws_rate"], (isset($_GET["swipbox"]) ? $_GET["swipbox"] : ''));
                     }
                 }
                 if(isset($_GET["webshipr_reprocess"])){
@@ -526,7 +567,7 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
                                 }
 
                                 echo "</select>&nbsp;";
-                                echo "<a onClick=\"reprocess_order()\" href=\"#\">Re-process order</a>";
+                                echo "<a class=\"button button-primary\" onClick=\"reprocess_order()\"  href=\"#\">Re-process order</a>";
 
                                 // This is already within a form, so we need a workaround to submit data for processing
 
@@ -577,7 +618,7 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
                             echo '</select>';
                         }
 
-                        echo "<a onClick=\"process_order()\" href=\"#\">Process order</a>";
+                        echo "<a class=\"button button-primary\" onClick=\"process_order()\" href=\"#\">Process order</a>";
 
                         // This is already within a form, so we need a workaround to submit data for processing
 
