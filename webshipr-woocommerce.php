@@ -6,7 +6,7 @@ Plugin URI: http://www.webshipr.com
 Description: Automated shipping for WooCommerce
 Author: webshipr.com
 Author URI: http://www.webshipr.com
-Version: 2.1.6
+Version: 2.1.7
 
 */
 
@@ -795,7 +795,7 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
                 $shipment->TotalPrice       = $woo_order->order_total - $woo_order->order_shipping - $woo_order->order_shipping_tax;
                 $shipment->Currency         = get_woocommerce_currency();
                 $shipment->swipbox_size     = $swipbox; 
-
+                $shipment->Comment          = $woo_order->customer_message; 
 
                 // Check if the order has a dynamic address
                 $dynamic_order = $wpdb->get_row("SELECT * FROM ".$this->ws_table()." WHERE woo_order_id = ".$woo_order->id);

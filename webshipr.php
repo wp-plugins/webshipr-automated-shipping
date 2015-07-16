@@ -95,6 +95,7 @@ class WebshiprAPI{
 			"SubTotalPrice" => $shipment->SubTotalPrice,
 			"TotalPrice" => $shipment->TotalPrice,
 			"Currency"	=> $shipment->Currency,
+			"Comment" => $shipment->Comment,
 			"custom_pickup_identifier" => $shipment->custom_pickup_identifier, 
 			"swipbox_size" => $shipment->swipbox_size
 		);
@@ -166,6 +167,7 @@ class Shipment{
 		public $TotalPrice;
 		public $Currency;
 		public $custom_pickup_identifier;
+		public $Comment;
 		public $swipbox_size;
 }
 
