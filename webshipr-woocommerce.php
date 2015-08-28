@@ -6,7 +6,7 @@ Plugin URI: http://www.webshipr.com
 Description: Automated shipping for WooCommerce
 Author: webshipr.com
 Author URI: http://www.webshipr.com
-Version: 2.1.7
+Version: 2.1.8
 
 */
 
@@ -253,11 +253,11 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 
            // Set ajax url in checkout
            public function set_ajaxurl(){
-
+                global $woocommerce;
             ?>
                 <script type="text/javascript">
-                        wspup.ajaxUrl   = '<?php echo WooCommerce::ajax_url(); ?>';
-                        ws_ajax_url     = '<?php echo WooCommerce::ajax_url(); ?>';
+                        wspup.ajaxUrl   = '<?php echo $woocommerce->ajax_url(); ?>';
+                        ws_ajax_url     = '<?php echo $woocommerce->ajax_url(); ?>';
                 </script>
             <?php
            }
