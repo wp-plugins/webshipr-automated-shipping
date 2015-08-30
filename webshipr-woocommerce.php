@@ -6,7 +6,7 @@ Plugin URI: http://www.webshipr.com
 Description: Automated shipping for WooCommerce
 Author: webshipr.com
 Author URI: http://www.webshipr.com
-Version: 2.1.8
+Version: 2.1.9
 
 */
 
@@ -264,15 +264,50 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 
            // Override delivery info
            public function override_delivery($order_id){
-                if(strlen($_POST["wspup_id"])>0){
-                    update_post_meta( $order_id, '_shipping_first_name', '');
-                    update_post_meta( $order_id, '_shipping_last_name', '');
-                    update_post_meta( $order_id, '_shipping_address_1', $_POST["wspup_address"]);
-                    update_post_meta( $order_id, '_shipping_address_2', '');
-                    update_post_meta( $order_id, '_shipping_company', $_POST["wspup_name"]);
-                    update_post_meta( $order_id, '_shipping_city', $_POST["wspup_city"]);
-                    update_post_meta( $order_id, '_shipping_postcode', $_POST["wspup_zip"]);
+
+              // Some themes started to not register any delivery address. 
+              $order = new WC_Order($order_id);
+
+              // If PUP Shipment
+              if(isset($_POST["wspup_id"]) && strlen($_POST["wspup_id"])>0){
+
+                // If delivery present - update. If not add
+                if($order->shipping_address_1 && strlen($order->shipping_address_1) > 0){
+                  
+                  update_post_meta( $order_id, '_shipping_first_name', '');
+                  update_post_meta( $order_id, '_shipping_last_name', '');
+                  update_post_meta( $order_id, '_shipping_address_1', $_POST["wspup_address"]);
+                  update_post_meta( $order_id, '_shipping_address_2', '');
+                  update_post_meta( $order_id, '_shipping_company', $_POST["wspup_name"]);
+                  update_post_meta( $order_id, '_shipping_city', $_POST["wspup_city"]);
+                  update_post_meta( $order_id, '_shipping_postcode', $_POST["wspup_zip"]);
+                  
+                }else{
+                  
+                  add_post_meta( $order_id, '_shipping_first_name', false);
+                  add_post_meta( $order_id, '_shipping_last_name', false);
+                  add_post_meta( $order_id, '_shipping_address_1', $_POST["wspup_address"], false);
+                  add_post_meta( $order_id, '_shipping_address_2', false);
+                  add_post_meta( $order_id, '_shipping_company', $_POST["wspup_name"], false);
+                  add_post_meta( $order_id, '_shipping_city', $_POST["wspup_city"], false);
+                  add_post_meta( $order_id, '_shipping_postcode', $_POST["wspup_zip"], false);
+                  
                 }
+             } else { // Not PUP
+                
+                // Puts delivery as billing if only billing present
+                if(!$order->shipping_address_1 || strlen($order->shipping_address_1) == 0){
+                  add_post_meta( $order_id, '_shipping_first_name',$order->billing_first_name, false);
+                  add_post_meta( $order_id, '_shipping_last_name',$order->billing_last_name, false);
+                  add_post_meta( $order_id, '_shipping_address_1', $order->billing_address_1, false);
+                  add_post_meta( $order_id, '_shipping_address_2', "",false);
+                  add_post_meta( $order_id, '_shipping_company', $order->billing_company, false);
+                  add_post_meta( $order_id, '_shipping_city', $order->billing_city, false);
+                  add_post_meta( $order_id, '_shipping_postcode', $order->billing_postcode, false);
+                }
+                
+              }
+
            }
 
            // Is rate dynamic, Ajax
@@ -299,8 +334,9 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 
            // Order placed
            public function order_placed($order_id){
+                
                 global $wpdb;
-                if(strlen($_POST["wspup_id"])>0){
+                if(isset($_POST["wspup_id"]) && strlen($_POST["wspup_id"])>0){
                     $table_name = $wpdb->prefix . "webshipr";
 
                     if(is_array($_POST["shipping_method"])){
@@ -312,19 +348,17 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
                     }
 
                     $wpdb->insert( $table_name, array( 'woo_order_id' => $order_id, 
-                        'dynamic_pickup_identifier' => mysql_escape_string($_POST["wspup_id"]),
-                        'shipping_method' => mysql_escape_string($rate_id),
-                        'country_code' => mysql_escape_string($_POST["wspup_country"]),
-                        'address' => mysql_escape_string($_POST["wspup_address"]),
-                        'city' => mysql_escape_string($_POST["wspup_city"]),
-                        'postal_code' => mysql_escape_string($_POST["wspup_zip"]),
-                        'name' => mysql_escape_string($_POST["wspup_name"])
+                        'dynamic_pickup_identifier' =>  esc_sql($_POST["wspup_id"]),
+                        'shipping_method' => esc_sql($rate_id),
+                        'country_code' => esc_sql($_POST["wspup_country"]),
+                        'address' => esc_sql($_POST["wspup_address"]),
+                        'city' => esc_sql($_POST["wspup_city"]),
+                        'postal_code' => esc_sql($_POST["wspup_zip"]),
+                        'name' => esc_sql($_POST["wspup_name"])
                     ));
 
                 }
-
-
-
+                
             }
 
            // Create Webshipr table to store pickup places for orders
@@ -783,6 +817,11 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
                 $deliv_adr->Phone = $woo_order->billing_phone;
                 $deliv_adr->ZIP = $woo_order->shipping_postcode;
 
+                // Woo has started to only offer billing adr some times # For some weird reason strlen has been removed at this time?!
+                if(!$deliv_adr->Address1 ||count(str_split((string)$deliv_adr->Address1)) == 0){
+                  $deliv_adr = $bill_adr;
+                }
+
 
                 // Create the shipment
                 $shipment = new Shipment();
@@ -954,7 +993,7 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 
 
                     // If any rates were found
-                    if($rates){
+                    if($rates && !(isset($rates->status) && $rates->status == 401)){
                         foreach($rates as $rate){
                             if($this->country_accepted($rate, $destination) && 
                                 $rate->max_weight >= $cart_weight && $rate->min_weight <= $cart_weight){
