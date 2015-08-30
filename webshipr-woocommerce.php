@@ -313,7 +313,7 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
            // Is rate dynamic, Ajax
            public function check_rates(){
                 // Get Rate
-                $rate_id = mysql_escape_string($_REQUEST['rate_id']); 
+                $rate_id = esc_sql($_REQUEST['rate_id']); 
                 $api = $this->ws_api($this->options['api_key']);
                 $rates = $api->GetShippingRates(); 
                 $is_dyn_required = false; 
