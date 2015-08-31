@@ -24,7 +24,7 @@ if ( ! class_exists( 'WebshiprOrderHtml' ) ) {
 			$this->WebshiprWC		= $WebshiprWC;
 			$this->api 				= $this->WebshiprWC->ws_api();
 			$this->rates 			= $this->api->GetShippingRates();
-			$this->pickupPoint		= $pickupPoint;
+
 
 			// Depending on woocommerce version, get the shipping method / rate id
             if(method_exists($wooOrder, 'get_shipping_methods')){
@@ -156,7 +156,7 @@ if ( ! class_exists( 'WebshiprOrderHtml' ) ) {
             echo "</select>&nbsp;";
 
             // Select swipbox size
-            if((int)$this->options['swipbox'] == 1){
+            if((int)$this->WebshiprWC->options['swipbox'] == 1){
                 echo '<select name="swipbox" id="swipbox">';
                 echo '<option value="1">Small</option>';
                 echo '<option value="2">Medium</option>';
@@ -224,8 +224,7 @@ if ( ! class_exists( 'WebshiprOrderHtml' ) ) {
 		// Status header
 		private function renderHeader(){
 			echo '<div class="postbox" id="webshipr_backend" style="display:none;">';
-            echo '<div class="handlediv" title="Click to toggle"><br></div>';
-            echo '<h3 class="handle">Webshipr status</h3>';
+            echo '<h3>Webshipr status</h3>';
             echo '<div class="inside">';
             echo '<table style="margin-left: 10px; width: 100%; ">';
 		}

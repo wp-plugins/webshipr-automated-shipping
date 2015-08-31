@@ -142,7 +142,7 @@ class WebshiprAPI{
 		$returndata = curl_exec($ch);
 		$res = json_decode($returndata);
 
-		if($res->status == 401){
+		if(isset($res->status) && $res->status == 401){
 			return false;
 		}else{
 			return $res;
