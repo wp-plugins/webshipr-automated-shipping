@@ -77,4 +77,5 @@ It's free to try for 30 days. Sign up on http://www.webshipr.com.
 * 2.1.7: Transfers comment to webshipr
 * 2.1.8: Removed dreprecation warning in get_ajax_url
 * 2.1.9: Fixed 'Session expired problem' 
+* 2.2.0: Inserted error messages and ability to update orders from woocommerce backend. 
 -------------------------
