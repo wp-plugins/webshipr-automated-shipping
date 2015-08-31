@@ -49,29 +49,23 @@ class WebshiprAPI{
 	}
 
 
-	function GetPostDKShops($country, $street, $number, $postal){
-		$data = array("postal_code" => $postal, "country" => $country , "street" => $street, "number" => $number);
-		return $this->post_data("post_dk_shops", $data)->servicePointInformationResponse;
-	}
-
-
 	private function post_datav2($path, $data){
-                $ch = curl_init($this->base_host.'/APIV2/'.$path); #$this->base_host."/APIV2/".$resource);
-                curl_setopt($ch, CURLOPT_POST, true);
-                curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json',
-                'Authorization: Token token="'.$this->api_token.'"'));
-                curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                return json_decode(curl_exec($ch));
+        $ch = curl_init($this->base_host.'/APIV2/'.$path); #$this->base_host."/APIV2/".$resource);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json',
+        'Authorization: Token token="'.$this->api_token.'"'));
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        return json_decode(curl_exec($ch));
 	}
 	private function post_data($resource, $data){
 		$ch = curl_init($this->base_host."/API/".$resource);
-	        curl_setopt($ch, CURLOPT_POST, true);
-    	    	curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json',
-     	   	'Authorization: Token token="'.$this->api_token.'"'));
-     	   	curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-      		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-      	  	return json_decode(curl_exec($ch));
+        curl_setopt($ch, CURLOPT_POST, true);
+	    	curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json',
+ 	   	'Authorization: Token token="'.$this->api_token.'"'));
+ 	   	curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+  		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+  	  	return json_decode(curl_exec($ch));
 	}
 
 	function GetOrder($order_no){
@@ -110,6 +104,35 @@ class WebshiprAPI{
 		return $returndata;
 	}
 
+	function UpdateShipment($shipment){
+
+		$datatopost = array (
+			"billing_address" => (array)$shipment->BillingAddress,
+			"delivery_address" => (array)$shipment->DeliveryAddress,
+			"dynamic_address" => (array)$shipment->DynamicAddress,
+			"items" => (array)$shipment->Items,
+			"ExtRef" => $shipment->ExtRef,
+			"Weight" => $shipment->Weight,
+			"ShippingRate" => $shipment->ShippingRate,
+			"SubTotalPrice" => $shipment->SubTotalPrice,
+			"TotalPrice" => $shipment->TotalPrice,
+			"Currency"	=> $shipment->Currency,
+			"Comment" => $shipment->Comment,
+			"custom_pickup_identifier" => $shipment->custom_pickup_identifier, 
+			"swipbox_size" => $shipment->swipbox_size, 
+			"process" => true
+		);
+
+		$ch = curl_init($this->base_host."/API/update_shipment");
+		curl_setopt($ch, CURLOPT_POST, true);
+		curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json',
+		'Authorization: Token token="'.$this->api_token.'"'));
+		curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($datatopost));
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		$returndata = curl_exec($ch);
+		return $returndata;
+	}
+
 	function CheckConnection(){
 		$ch = curl_init($this->base_host."/API/check_connection");
 		curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json',
@@ -118,11 +141,11 @@ class WebshiprAPI{
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 		$returndata = curl_exec($ch);
 		$res = json_decode($returndata);
-		
-		if($res){
-			return $res;
-		}else{
+
+		if($res->status == 401){
 			return false;
+		}else{
+			return $res;
 		}
 	}
 
