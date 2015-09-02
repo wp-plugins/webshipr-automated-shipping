@@ -98,13 +98,13 @@ function shipping_method_init() {
 
             // Method to validate rate from country id
             private function country_accepted($rate, $cur_country){
-                    $result = false;
-                    foreach($rate->accepted_countries as $country){
-                            if($country->code == $cur_country || $country == 'ALL'){
-                                    $result = true;
-                            }                       
-                    }
-                    return $result;
+                $result = false;
+                foreach($rate->accepted_countries as $country){
+                        if($country->code == $cur_country || $country == 'ALL'){
+                                $result = true;
+                        }                       
+                }
+                return $result;
             }
 
             // Return Webshipr API object

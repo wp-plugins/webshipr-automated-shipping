@@ -57,21 +57,14 @@ if ( ! class_exists( 'WebshiprWC' ) ) {
             add_action( 'wp_ajax_get_shops', array($this, 'ajax_get_shops') );
             
 
-
-            register_activation_hook(__FILE__, array($this,'activate'));
-
             // Localization 
             load_plugin_textdomain('WebshiprWC', false, basename( dirname( __FILE__ ) ) . '/languages' );
 
             // Initialize settings
             $this->options = get_option('webshipr_options');
 
-            // Need to add extra field for locations
-            // Display Field
-            add_action( 'woocommerce_product_options_general_product_data', array($this, 'woo_add_custom_general_fields') );
-            // Save Field
-            add_action( 'woocommerce_process_product_meta', array($this, 'woo_add_custom_general_fields_save' ));
-
+            // Activate
+            register_activation_hook(__FILE__, array($this,'activate'));
        }
 
 
@@ -130,36 +123,6 @@ if ( ! class_exists( 'WebshiprWC' ) ) {
             wp_localize_script( 'get_shops', 'wsAjax', array( 'ajaxurl' => admin_url( 'admin-ajax.php' ))); 
 
        }           
-
-
-        // Update product location 
-       function woo_add_custom_general_fields_save( $post_id ){
-            $woocommerce_text_field = $_POST['_webshipr_location'];
-            if( !empty( $woocommerce_text_field ) )
-                    update_post_meta( $post_id, '_webshipr_location', esc_attr( $woocommerce_text_field ) );
-
-        }
-
-        // Add field under product for stock location
-        function woo_add_custom_general_fields() {
-
-                  global $woocommerce, $post;
-
-                  echo '<div class="options_group">';
-
-                  woocommerce_wp_text_input(
-                        array(
-                                'id'          => '_webshipr_location',
-                                'label'       => __( 'Webshipr stock location', 'woocommerce' ),
-                                'placeholder' => '',
-                                'desc_tip'    => 'true',
-                                'description' => __( 'This is the stock location that will get transfered to webshipr', 'woocommerce' )
-                        )
-                );
-
-                  echo '</div>';
-
-        }
 
        // Autoprocess
        public function auto_process($order_id){
@@ -492,29 +455,29 @@ if ( ! class_exists( 'WebshiprWC' ) ) {
             $ws_items = array();
             
 
+            // Append items
             foreach($items as $item){
 
-                $weight_uom = get_option('woocommerce_weight_unit');
-
-                if($weight_uom == 'kg'){
-                    if((int)$item["variation_id"] > 0){
-                        $variation = new WC_Product_Variation($item["variation_id"]);
-                        $weight = (double)$variation->get_weight()*(double)$item["qty"]*1000;
-                    }else{
-                        $weight = (double)get_product($item["product_id"])->get_weight()*(double)$item["qty"]*1000;
-                    }
+                // Get apropriate product info 
+                if((int)$item["variation_id"] > 0){
+                  $product = new WC_Product_Variation($item["variation_id"]); // Variation inherits Product
                 }else{
-                    if((int)$item["variation_id"] > 0){
-                        $variation = new WC_Product_Variation($item["variation_id"]);
-                        $weight = (double)$variation->get_weight()*(double)$item["qty"];
-                    }else{
-                        $weight = (double)get_product($item["product_id"])->get_weight()*(double)$item["qty"];
-                    }
+                  $product = new WC_Product($item["product_id"]);
                 }
 
-                $product = new WC_Product($item["product_id"]);
-                $location = get_post_meta( $item["product_id"], '_webshipr_location', true );
-                $ws_items[] = new ShipmentItem($product->get_sku(), $item["name"], $item["product_id"], $item["qty"], "pcs", $weight, $location);
+                // Get apropriate weight
+                $weight_uom = get_option('woocommerce_weight_unit');
+                $weight_multiplier = $weight_uom == 'kg' ? 1000 : 1; 
+                $weight = (double)$product->get_weight() * (double)$item["qty"] * $weight_multiplier;
+
+                // Add items
+                $ws_items[] = new ShipmentItem( $this->getSku($product->get_sku()), 
+                                                $item["name"], 
+                                                $item["product_id"], 
+                                                $item["qty"], 
+                                                "pcs", 
+                                                $weight, 
+                                                $this->getLocation($product->get_sku()) );
                 
             }
 
@@ -587,6 +550,34 @@ if ( ! class_exists( 'WebshiprWC' ) ) {
 
             return $shipment; 
         }
+
+        /* 
+         * In order to satisfy requirements of seperating SKU from Stock locations we have decided to 
+         * put both in SKU. This because there is no nice way to add additional attributes to Product Variations.  
+         * Therefore the SKU can be seperated from Locations by using "SKU - LOC"
+         */ 
+
+        // Get SKU by SKU Field
+        private function getSku( $sku ){
+                if( isset( $sku ) ){
+                        $spl = explode( '-', $sku );
+                        return $spl[0];
+                }else{
+                        return "";
+                }
+        }
+
+        // Get Location by SKU Field
+        private function getLocation( $sku ){
+                if( isset( $sku ) ){
+                        $spl = explode( '-', $sku );
+                        return end( $spl );
+                }else{
+                        return "";
+                }
+        }
+
+
     }
 }
 // Add to globals
