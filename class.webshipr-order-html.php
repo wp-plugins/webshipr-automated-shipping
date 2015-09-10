@@ -204,7 +204,7 @@ if ( ! class_exists( 'WebshiprOrderHtml' ) ) {
 
 		// HTML If an order is sent to partner
 		private function renderPartner(){
-			echo "<tr><td>Processing with: </td><td>".$this->WebshiprWC->get_rate_name($this->webshiprOrder->shipping_rate_id,$rates)."</td></tr>";
+			echo "<tr><td>Processing with: </td><td>".$this->get_rate_name($this->webshiprOrder->shipping_rate_id,$rates)."</td></tr>";
 		}
 
 
