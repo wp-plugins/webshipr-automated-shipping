@@ -215,8 +215,6 @@ if ( ! class_exists( 'WebshiprWC' ) ) {
             // If delivery present - update. If not add
             if(isset($order->shipping_address_1) && strlen($order->shipping_address_1) > 0){
               
-              update_post_meta( $order_id, '_shipping_first_name', '');
-              update_post_meta( $order_id, '_shipping_last_name', '');
               update_post_meta( $order_id, '_shipping_address_1', $_POST["wspup_address"]);
               update_post_meta( $order_id, '_shipping_address_2', '');
               update_post_meta( $order_id, '_shipping_company', $_POST["wspup_name"]);

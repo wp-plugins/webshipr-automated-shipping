@@ -89,7 +89,7 @@ if ( ! class_exists( 'WebshiprOrderHtml' ) ) {
 					if($this->pickupPoint)
 						$this->renderPickupAddress(); 
 
-					if($this->webshiprOrder->status == "dispatched" ||  $this->webshiprOrder->status == "partly_dispatched"){
+					if($this->webshiprOrder->status == "dispatched" ||  $this->webshiprOrder->status == "partly_dispatched" ){
 						$this->renderSent(); 
 					}else if($this->webshiprOrder->status == "partner_processing" || $this->webshiprOrder->status == "pending_partner" || $this->webshiprOrder->status == "partner_waiting_for_stock"){
 						$this->renderPartner(); 
