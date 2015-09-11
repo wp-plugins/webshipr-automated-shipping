@@ -212,15 +212,14 @@ if ( ! class_exists( 'WebshiprWC' ) ) {
           // If PUP Shipment
           if(isset($_POST["wspup_id"]) && strlen($_POST["wspup_id"])>0){
 
-            // If delivery present - update. If not add
-            if(isset($order->shipping_address_1) && strlen($order->shipping_address_1) > 0){
-              
+            if(isset($order->shipping_address_1) && strlen($order->shipping_address_1) > 0){              
+              update_post_meta( $order_id, '_shipping_first_name', $order->billing_first_name);
+-             update_post_meta( $order_id, '_shipping_last_name', $order->billing_last_name);
               update_post_meta( $order_id, '_shipping_address_1', $_POST["wspup_address"]);
               update_post_meta( $order_id, '_shipping_address_2', '');
               update_post_meta( $order_id, '_shipping_company', $_POST["wspup_name"]);
               update_post_meta( $order_id, '_shipping_city', $_POST["wspup_city"]);
               update_post_meta( $order_id, '_shipping_postcode', $_POST["wspup_zip"]);
-
             }
          } 
 
