@@ -351,10 +351,10 @@ if ( ! class_exists( 'WebshiprWC' ) ) {
                             <td>
                               <?php $autoprocess = $options["auto_process"]; ?>
                                 <select name="<?php echo $this->option_name?>[auto_process][]?>" multiple='multiple'>
-                                  <option value="payment_received" <?php echo in_array("payment_received", $autoprocess) ? "selected" : "" ?>>Payment complete hook</option>
-                                  <option value="status_pending" <?php echo in_array("status_pending", $autoprocess) ? "selected" : "" ?>>Status pending</option>
-                                  <option value="status_completed" <?php echo in_array("status_completed", $autoprocess) ? "selected" : "" ?>>Status completed</option>
-                                  <option value="status_processing"  <?php echo in_array("status_processing", $autoprocess) ? "selected" : "" ?>>Status processing</option>
+                                  <option value="payment_received" <?php echo (is_array($autoprocess) && in_array("payment_received", $autoprocess)) ? "selected" : "" ?>>Payment complete hook</option>
+                                  <option value="status_pending" <?php echo (is_array($autoprocess) && in_array("status_pending", $autoprocess)) ? "selected" : "" ?>>Status pending</option>
+                                  <option value="status_completed" <?php echo (is_array($autoprocess) && in_array("status_completed", $autoprocess)) ? "selected" : "" ?>>Status completed</option>
+                                  <option value="status_processing"  <?php echo (is_array($autoprocess) && in_array("status_processing", $autoprocess)) ? "selected" : "" ?>>Status processing</option>
                                 </select>
                             </td>
                         </tr>
