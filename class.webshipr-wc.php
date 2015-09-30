@@ -46,8 +46,6 @@ if ( ! class_exists( 'WebshiprWC' ) ) {
             // Hook to do checkout validation
             add_action('woocommerce_checkout_process', array($this, 'validate_on_process')); 
 
-            // Autoprocess
-            add_action('woocommerce_payment_complete', array($this, 'auto_process'));
 
             // Hook ajax methods
             add_action( 'wp_ajax_nopriv_check_rates', array($this, "check_rates"));
@@ -65,7 +63,35 @@ if ( ! class_exists( 'WebshiprWC' ) ) {
 
             // Activate
             register_activation_hook(__FILE__, array($this,'activate'));
+       
+
+            /* 
+              Module can autoprocess orders in different states. It used to only autoprocess on payment_complete, but
+              since not all payment modules fires this action, it has been decided to autoprocess on different statuses ( by setting ). 
+            */ 
+            $auto_process = $this->options['auto_process']; 
+
+            if(isset($auto_process) && is_array($auto_process)){
+              
+              // Hook the different statuses 
+              if(in_array("status_processing", $auto_process))
+                add_action('woocommerce_order_status_processing', array($this, 'auto_process')); 
+
+              if(in_array("status_pending", $auto_process))
+                add_action('woocommerce_order_status_pending', array($this, 'auto_process')); 
+              
+              if(in_array("status_completed", $auto_process))
+                add_action('woocommerce_order_status_completed', array($this, 'auto_process')); 
+
+              if(in_array("payment_complete", $auto_process))
+                add_action('woocommerce_payment_complete', array($this, 'auto_process'));
+              
+
+            }else if(isset($auto_process) && $auto_process && (int)$auto_process == 1){ // Support the old setting type
+              add_action('woocommerce_payment_complete', array($this, 'auto_process'));
+            }
        }
+
 
 
        // Register JS scripts
@@ -186,7 +212,7 @@ if ( ! class_exists( 'WebshiprWC' ) ) {
             }
             
            // Add error
-           if($is_dyn_required && strlen($_REQUEST["wspup_id"]) == 0){
+           if($is_dyn_required && ( !isset($_REQUEST["wspup_id"]) || strlen($_REQUEST["wspup_id"]) == 0)){
                 wc_add_notice( __('Select a pickup point to proceed' , 'WebshiprWC'), "error"); 
            }
 
@@ -211,8 +237,6 @@ if ( ! class_exists( 'WebshiprWC' ) ) {
 
           // If PUP Shipment
           if(isset($_POST["wspup_id"]) && strlen($_POST["wspup_id"])>0){
-
-            if(isset($order->shipping_address_1) && strlen($order->shipping_address_1) > 0){              
               update_post_meta( $order_id, '_shipping_first_name', $order->billing_first_name);
 -             update_post_meta( $order_id, '_shipping_last_name', $order->billing_last_name);
               update_post_meta( $order_id, '_shipping_address_1', $_POST["wspup_address"]);
@@ -220,8 +244,7 @@ if ( ! class_exists( 'WebshiprWC' ) ) {
               update_post_meta( $order_id, '_shipping_company', $_POST["wspup_name"]);
               update_post_meta( $order_id, '_shipping_city', $_POST["wspup_city"]);
               update_post_meta( $order_id, '_shipping_postcode', $_POST["wspup_zip"]);
-            }
-         } 
+          } 
 
        }
 
@@ -311,6 +334,7 @@ if ( ! class_exists( 'WebshiprWC' ) ) {
             add_options_page('webshipr options', 'Webshipr options', 'manage_options', 'webshipr_options', array($this, 'options'));
         }
 
+
         // Print the settings menupage itself
         public function options() {
             $options = get_option($this->option_name);
@@ -325,16 +349,31 @@ if ( ! class_exists( 'WebshiprWC' ) ) {
                         </tr>
                         <tr valign="top"><th scope="row">Autoprocess shipments</th>
                             <td>
-                                <input type="checkbox" name="<?php echo $this->option_name?>[auto_process]" <?php echo (int)$options['auto_process'] == 1 ? "checked" : "" ?> />
-                                <i>This setting is typically used if you have a warehouse integration. It means that it will automatically send the order to webshipr, when its created.</i>
+                              <?php $autoprocess = $options["auto_process"]; ?>
+                                <select name="<?php echo $this->option_name?>[auto_process][]?>" multiple='multiple'>
+                                  <option value="payment_received" <?php echo in_array("payment_received", $autoprocess) ? "selected" : "" ?>>Payment complete hook</option>
+                                  <option value="status_pending" <?php echo in_array("status_pending", $autoprocess) ? "selected" : "" ?>>Status pending</option>
+                                  <option value="status_completed" <?php echo in_array("status_completed", $autoprocess) ? "selected" : "" ?>>Status completed</option>
+                                  <option value="status_processing"  <?php echo in_array("status_processing", $autoprocess) ? "selected" : "" ?>>Status processing</option>
+                                </select>
                             </td>
                         </tr>
-                        <tr valign="top"><th scope="row">Show swipbox settings</th>
+                        <tr>
+                          <th colspan="2">
+                            <i style="font-weight: normal;">Autoprocess shipments means that the order will automatically be sent to webshipr in a given state.</i>
+                          </th>
+                        </tr>
+                       <!-- <tr valign="top"><th scope="row">Show swipbox settings</th>
                             <td>
                                 <input type="checkbox" name="<?php echo $this->option_name?>[swipbox]" <?php echo (int)$options['swipbox'] == 1 ? "checked" : "" ?> />
-                                <i>Shows parcel size for order. Needed for swipbox, if you deliver parcels directly in parcel stations.</i>
+                                
                             </td>
                         </tr>
+                        <tr>
+                          <td colspan="2">
+                              <i>Shows parcel size for order. Needed for swipbox, if you deliver parcels directly in parcel stations.</i>
+                          </td>
+                        </tr>-->
                     </table>
                     <p class="submit">
                         <input type="submit" class="button-primary" value="<?php _e('Save Changes') ?>" />
@@ -350,7 +389,7 @@ if ( ! class_exists( 'WebshiprWC' ) ) {
 
             $valid = array();
             $valid['api_key'] = sanitize_text_field($input['api_key']);
-            $valid['auto_process'] = ($input['auto_process'] == 'on' ? true : false);
+            $valid['auto_process'] = $input['auto_process'];
             $valid['show_search_address'] = ($input['show_search_address'] == 'on' ? true : false);
             $valid['show_address_bar'] = ($input['show_address_bar'] == 'on' ? true : false);
             $valid['swipbox'] = ($input['swipbox'] == 'on' ? true : false);
