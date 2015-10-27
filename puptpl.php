@@ -51,29 +51,43 @@
 			</span>
 		</div>
 
-		<div class="wspup_cart">
-			<input type="button" class="button" style="float: none;" value="<?php echo  __('Choose pickup point', 'WebshiprWC'); ?>" id="wspup_show_btn" onClick="wspup.showPup();wspupTransferAddress();">
-			
-			<input type="hidden" name="wspup_name">
-			<input type="hidden" name="wspup_address">
-			<input type="hidden" name="wspup_zip">
-			<input type="hidden" name="wspup_city">
-			<input type="hidden" name="wspup_country">
-			<input type="hidden" name="wspup_id">
-			<input type="hidden" name="wspup_carrier">
+        <div class="wspup_cart">
+                <input type="button" class="button" style="float: none;" value="<?php echo  __('Choose pickup point', 'WebshiprWC'); ?>" id="wspup_show_btn" onClick="wspup.showPup();wspupTransferAddress();">
+                <?php
+                // If ie. validation failed - catch parameters to ensure the customer doesnt need to pick droppoint again
+                $parameters = array();
+                if( isset( $_POST["post_data"] ) )
+                        parse_str( $_POST["post_data"], $parameters );
+                ?>
+                <input type="hidden" name="wspup_name" value="<?php echo (isset($parameters["wspup_name"]) ? $parameters["wspup_name"] : ""); ?>">
+                <input type="hidden" name="wspup_address" value="<?php echo (isset($parameters["wspup_address"]) ? $parameters["wspup_address"] : ""); ?>">
+                <input type="hidden" name="wspup_zip" value="<?php echo (isset($parameters["wspup_zip"]) ? $parameters["wspup_zip"] : ""); ?>">
+                <input type="hidden" name="wspup_city" value="<?php echo (isset($parameters["wspup_city"] )? $parameters["wspup_city"] : ""); ?>">
+                <input type="hidden" name="wspup_country" value="<?php echo (isset($parameters["wspup_country"]) ? $parameters["wspup_country"] : ""); ?>">
+                <input type="hidden" name="wspup_id" value="<?php echo (isset($parameters["wspup_id"]) ? $parameters["wspup_id"] : ""); ?>">
+                <input type="hidden" name="wspup_carrier" value="<?php echo (isset($parameters["wspup_carrier"]) ? $parameters["wspup_carrier"] : ""); ?>">
 
-			<input type="hidden" name="i18n_selected_pickup_point" value="<?php echo  __('Selected pickup point', 'WebshiprWC'); ?>">
-			<input type="hidden" name="i18n_opening_hours" value="<?php echo  __('Opening hours', 'WebshiprWC'); ?>">
-			<input type="hidden" name="i18n_see_opening_hours" value="<?php echo  __('See opening hours', 'WebshiprWC'); ?>">
-			<input type="hidden" name="i18n_monday" value="<?php echo  __('Monday', 'WebshiprWC'); ?>">
-			<input type="hidden" name="i18n_tuesday" value="<?php echo  __('Tuesday', 'WebshiprWC'); ?>">
-			<input type="hidden" name="i18n_wednesday" value="<?php echo  __('Wednesday', 'WebshiprWC'); ?>">
-			<input type="hidden" name="i18n_thursday" value="<?php echo  __('Thursday', 'WebshiprWC'); ?>">
-			<input type="hidden" name="i18n_friday" value="<?php echo  __('Friday', 'WebshiprWC'); ?>">
-			<input type="hidden" name="i18n_saturday" value="<?php echo  __('Saturday', 'WebshiprWC'); ?>">
-			<input type="hidden" name="i18n_sunday" value="<?php echo  __('Sunday', 'WebshiprWC'); ?>">
+                <input type="hidden" name="i18n_selected_pickup_point" value="<?php echo  __('Selected pickup point', 'WebshiprWC'); ?>">
+                <input type="hidden" name="i18n_opening_hours" value="<?php echo  __('Opening hours', 'WebshiprWC'); ?>">
+                <input type="hidden" name="i18n_see_opening_hours" value="<?php echo  __('See opening hours', 'WebshiprWC'); ?>">
+                <input type="hidden" name="i18n_monday" value="<?php echo  __('Monday', 'WebshiprWC'); ?>">
+                <input type="hidden" name="i18n_tuesday" value="<?php echo  __('Tuesday', 'WebshiprWC'); ?>">
+                <input type="hidden" name="i18n_wednesday" value="<?php echo  __('Wednesday', 'WebshiprWC'); ?>">
+                <input type="hidden" name="i18n_thursday" value="<?php echo  __('Thursday', 'WebshiprWC'); ?>">
+                <input type="hidden" name="i18n_friday" value="<?php echo  __('Friday', 'WebshiprWC'); ?>">
+                <input type="hidden" name="i18n_saturday" value="<?php echo  __('Saturday', 'WebshiprWC'); ?>">
+                <input type="hidden" name="i18n_sunday" value="<?php echo  __('Sunday', 'WebshiprWC'); ?>">
 
-			<div id="wspup_selected_text"></div>
+                <div id="wspup_selected_text">
+                        <?php if(isset( $parameters["wspup_id"] ) && strlen( $parameters["wspup_id"] ) > 0 ){ ?>
+                        <div class="wspup_confirmation">
+                                <h3><?php echo  __('Selected pickup point', 'WebshiprWC'); ?></h3>
+                                <p><?php echo $parameters["wspup_name"]; ?></p>
+                                <p><?php echo $parameters["wspup_address"]; ?></p>
+                                <p><?php echo $parameters["wspup_zip"] . " " . $parameters["wspup_city"]; ?></p>
+                        </div>
+                        <?php } ?>
+                </div>
 		</div>
 
 

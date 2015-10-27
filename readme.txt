@@ -2,7 +2,7 @@
 Contributors: Webshipr 
 link: http://www.webshipr.dk
 Tags: shipping, valgfrit afhentningssted, automated shipping, post danmark, postdk, bluewater,blue water,woocommerce, automated shipping, dropshipping, webshipr, webshipper, GLS, Bring, DHL, DHL Express, DAO, DHL Parcel
-Stable tag: 2.2.5
+Stable tag: 2.2.6
 Requires at least: 3.7
 Tested up to: 4.3.0
 
@@ -81,4 +81,5 @@ It's free to try for 30 days. Sign up on http://www.webshipr.com.
 * 2.2.1: Warehouse locations should now be inserted in SKU field. 
 * 2.2.3: Inserted contact name on Delivery address for Drop point shipments
 * 2.2.4: Autoprocess settings has changed. It is now possible to autoprocess by different statuses
+* 2.2.6: Drop Point selection does not reset when other validation issues have appeared. 
 -------------------------
