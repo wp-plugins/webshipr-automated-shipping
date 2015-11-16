@@ -201,20 +201,24 @@ if ( ! class_exists( 'WebshiprWC' ) ) {
             $api = $this->ws_api();
             $rates = $api->GetShippingRates(); 
             $is_dyn_required = false; 
-
+	    $is_comment_required = false; 
             // Loop through rates, and check if the rate is dyn
             if(is_array($rates)){
                 foreach($rates as $rate){
-                    if($rate->dynamic_pickup && (("WS".$rate->id) == $rate_id)){
+                    if($rate->dynamic_pickup && (("WS".$rate->id) == $rate_id))
                         $is_dyn_required = true; 
-                    }
+		    if($rate->flex_delivery && (("WS".$rate->id) == $rate_id))
+			$is_comment_required = true; 
                 }  
             }
             
            // Add error
-           if($is_dyn_required && ( !isset($_REQUEST["wspup_id"]) || strlen($_REQUEST["wspup_id"]) == 0)){
+           if($is_dyn_required && ( !isset($_REQUEST["wspup_id"]) || strlen($_REQUEST["wspup_id"]) == 0))
                 wc_add_notice( __('Select a pickup point to proceed' , 'WebshiprWC'), "error"); 
-           }
+           
+
+	  if($is_comment_required && (!isset($_REQUEST["order_comments"]) || strlen($_REQUEST["order_comments"]) == 0))
+		wc_add_notice( __('Please add a comment describing where the package can be placed', 'WebshiprWC'), "error"); 
 
        }
 
@@ -506,15 +510,22 @@ if ( ! class_exists( 'WebshiprWC' ) ) {
                 $weight_multiplier = $weight_uom == 'kg' ? 1000 : 1; 
                 $weight = (double)$product->get_weight() * (double)$item["qty"] * $weight_multiplier;
 
-                // Add items
+            		// Get financial data for item. 
+            		// In webshipr price = unit price 
+            		$price = bcadd($item["line_subtotal"], '0', 2) / bcadd($item["qty"], '0', 2); 
+            		$tax_percent = bcadd($item["line_tax"], '0', 2) / bcadd($item["line_total"], '0', 2) * 100;
+                            
+            		// Add items
                 $ws_items[] = new ShipmentItem( $this->getSku($product->get_sku()), 
                                                 $item["name"], 
                                                 $item["product_id"], 
                                                 $item["qty"], 
                                                 "pcs", 
                                                 $weight, 
-                                                $this->getLocation($product->get_sku()) );
-                
+                                                $this->getLocation($product->get_sku()),
+                                    						$price, 
+                                    						$tax_percent
+						                                  );
             }
 
 
@@ -550,6 +561,23 @@ if ( ! class_exists( 'WebshiprWC' ) ) {
             }
 
 
+      	    // Get shipping methods 
+            $shipping_financial = array(); 
+      	    foreach($woo_order->get_shipping_methods() as $method ){
+      		    $shipping_financial[] = array("Name" => $method["method_id"], "Price" => $method["cost"], "TaxPercent" => 0); 
+      	    }
+
+
+      	    // Get applied coupons / discounts
+      	    if($woo_order->cart_discount > 0){ 
+      	   	    $discount_tax = bcadd($woo_order->cart_discount_tax, '0', 2) / bcadd($woo_order->cart_discount, '0', 2) * 100;
+      	    	  $discounts = array(array(	"Price" => $woo_order->get_total_discount(), 
+      						"TaxIncluded" => false,
+      						"TaxPercent" =>  $discount_tax));
+      	    }else{
+      		      $discounts = array(); 
+      	    }
+
             // Create the shipment
             $shipment = new Shipment();
             $shipment->BillingAddress   = $bill_adr;
@@ -562,7 +590,9 @@ if ( ! class_exists( 'WebshiprWC' ) ) {
             $shipment->Currency         = get_woocommerce_currency();
             $shipment->swipbox_size     = $swipbox; 
             $shipment->Comment          = $woo_order->customer_message; 
-
+      	    $shipment->ShippingFinancial = $shipping_financial; 
+       	    $shipment->Discounts 	= $discounts;
+		
             // Check if the order has a dynamic address
             $pickup_point_id = get_post_meta($woo_order->id, 'wspup_pickup_point_id', true); 
 
@@ -595,22 +625,22 @@ if ( ! class_exists( 'WebshiprWC' ) ) {
 
         // Get SKU by SKU Field
         private function getSku( $sku ){
-                if( isset( $sku ) ){
-                        $spl = explode( '-', $sku );
-                        return $spl[0];
-                }else{
-                        return "";
-                }
+          if( isset( $sku ) ){
+                  $spl = explode( '-', $sku );
+                  return $spl[0];
+          }else{
+                  return "";
+          }
         }
 
         // Get Location by SKU Field
         private function getLocation( $sku ){
-                if( isset( $sku ) ){
-                        $spl = explode( '-', $sku );
-                        return end( $spl );
-                }else{
-                        return "";
-                }
+          if( isset( $sku ) ){
+                  $spl = explode( '-', $sku );
+                  return end( $spl );
+          }else{
+                  return "";
+          }
         }
 
 

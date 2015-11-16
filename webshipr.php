@@ -89,6 +89,8 @@ class WebshiprAPI{
 			"SubTotalPrice" => $shipment->SubTotalPrice,
 			"TotalPrice" => $shipment->TotalPrice,
 			"Currency"	=> $shipment->Currency,
+                        "ShippingFinancial" => $shipment->ShippingFinancial,
+                        "Discounts"     => $shipment->Discounts,
 			"Comment" => $shipment->Comment,
 			"custom_pickup_identifier" => $shipment->custom_pickup_identifier, 
 			"swipbox_size" => $shipment->swipbox_size
@@ -118,6 +120,8 @@ class WebshiprAPI{
 			"TotalPrice" => $shipment->TotalPrice,
 			"Currency"	=> $shipment->Currency,
 			"Comment" => $shipment->Comment,
+			"ShippingFinancial" => $shipment->ShippingFinancial,
+			"Discounts" 	=> $shipment->Discounts,
 			"custom_pickup_identifier" => $shipment->custom_pickup_identifier, 
 			"swipbox_size" => $shipment->swipbox_size, 
 			"process" => true
@@ -191,6 +195,8 @@ class Shipment{
 		public $Currency;
 		public $custom_pickup_identifier;
 		public $Comment;
+		public $ShippingFinancial; 
+		public $Discounts; 
 		public $swipbox_size;
 }
 
@@ -215,8 +221,9 @@ class ShipmentItem{
 		public $UOM;
 		public $Weight;
 		public $Location;
-
-		public function __construct($Description, $ProductName, $ProductNo, $Quantity, $UOM,$Weight, $Location){
+		public $Price; 
+		public $TaxPercent;
+		public function __construct($Description, $ProductName, $ProductNo, $Quantity, $UOM,$Weight, $Location, $Price, $TaxPercent){
 			$this->Description = $Description;
 			$this->ProductName = $ProductName;
 			$this->ProductNo = $ProductNo;
@@ -224,6 +231,8 @@ class ShipmentItem{
 			$this->UOM = $UOM;
 			$this->Weight = $Weight;
 			$this->Location = $Location;
+			$this->Price = $Price; 
+			$this->TaxPercent = $TaxPercent; 
 		}
 
 }
