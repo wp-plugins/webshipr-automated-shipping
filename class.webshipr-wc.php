@@ -155,7 +155,8 @@ if ( ! class_exists( 'WebshiprWC' ) ) {
             // Autoprocess logic
             if((int)$this->options['auto_process'] == 1 && (int)$order_id > 0){ 
                 $woo_order = new WC_Order($order_id);
-                $woo_method_array = reset($woo_order->get_shipping_methods());
+                $woo_methods = $woo_order->get_shipping_methods();
+                $woo_method_array = reset($woo_methods);
                 $ws_rate_id = (preg_match("/WS/", $woo_method_array["method_id"]) ? str_replace("WS", "", $woo_method_array["method_id"]) : -1);
                
                 // Place order
@@ -512,8 +513,8 @@ if ( ! class_exists( 'WebshiprWC' ) ) {
 
             		// Get financial data for item. 
             		// In webshipr price = unit price 
-            		$price = bcadd($item["line_subtotal"], '0', 2) / bcadd($item["qty"], '0', 2); 
-            		$tax_percent = bcadd($item["line_tax"], '0', 2) / bcadd($item["line_total"], '0', 2) * 100;
+            		$price = (double)$item["line_subtotal"] / (double)$item["qty"];
+            		$tax_percent = (double)$item["line_tax"] / (double)$item["line_total"] * 100;
                             
             		// Add items
                 $ws_items[] = new ShipmentItem( $this->getSku($product->get_sku()), 
@@ -570,7 +571,7 @@ if ( ! class_exists( 'WebshiprWC' ) ) {
 
       	    // Get applied coupons / discounts
       	    if($woo_order->cart_discount > 0){ 
-      	   	    $discount_tax = bcadd($woo_order->cart_discount_tax, '0', 2) / bcadd($woo_order->cart_discount, '0', 2) * 100;
+      	   	    $discount_tax = (double)$woo_order->cart_discount_tax / (double)$woo_order->cart_discount * 100;
       	    	  $discounts = array(array(	"Price" => $woo_order->get_total_discount(), 
       						"TaxIncluded" => false,
       						"TaxPercent" =>  $discount_tax));
