@@ -85,4 +85,5 @@ It's free to try for 30 days. Sign up on http://www.webshipr.com.
 * 2.2.6: Drop Point selection does not reset when other validation issues have appeared. 
 * 2.2.7: Financial info transfered to webshipr in details in order to make duitable shipments more automated.
 * 2.2.8: Fixed minor bugs
+
 -------------------------
